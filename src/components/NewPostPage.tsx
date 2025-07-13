@@ -1,8 +1,19 @@
 import React, { useState } from 'react';
 import { ArrowLeft, Upload, X, Send, Globe, Share2 } from 'lucide-react';
+import imageCompression from 'browser-image-compression';
+import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
+import { storage } from '../config/firebase';
 
 interface NewPostPageProps {
-  onCreatePost: (postData: { title: string; description: string; category: 'Lost' | 'Found' | 'For Sale/Services'; image: string; price?: number; website?: string; socialMedia?: string }) => void;
+  onCreatePost: (postData: {
+    title: string;
+    description: string;
+    category: 'Lost' | 'Found' | 'For Sale/Services';
+    image: string;
+    price?: number;
+    website?: string;
+    socialMedia?: string;
+  }) => void;
   onNavigate: (page: 'Home') => void;
 }
 
@@ -28,14 +39,28 @@ export const NewPostPage: React.FC<NewPostPageProps> = ({ onCreatePost, onNaviga
     setLoading(false);
   };
 
-  const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.onload = (e) => {
-        setFormData(prev => ({ ...prev, image: e.target?.result as string }));
-      };
-      reader.readAsDataURL(file);
+    if (!file) return;
+
+    try {
+      // 1. Compress
+      const compressedFile = await imageCompression(file, {
+        maxSizeMB: 0.5,
+        maxWidthOrHeight: 1024,
+        useWebWorker: true,
+      });
+
+      // 2. Upload to Firebase
+      const imageRef = ref(storage, `images/${Date.now()}_${compressedFile.name}`);
+      await uploadBytes(imageRef, compressedFile);
+      const url = await getDownloadURL(imageRef);
+
+      // 3. Update formData
+      setFormData(prev => ({ ...prev, image: url }));
+    } catch (error) {
+      console.error("Image upload failed:", error);
+      alert("Failed to upload image.");
     }
   };
 
@@ -95,7 +120,7 @@ export const NewPostPage: React.FC<NewPostPageProps> = ({ onCreatePost, onNaviga
                 <button
                   key={category.value}
                   type="button"
-                  onClick={() => setFormData(prev => ({ ...prev, category: category.value as 'Lost' | 'Found' | 'For Sale/Services' }))}
+                  onClick={() => setFormData(prev => ({ ...prev, category: category.value as any }))}
                   className={`p-3 rounded-lg border font-medium transition-all duration-200 ${
                     formData.category === category.value
                       ? 'bg-blue-500 text-white border-blue-500'
@@ -108,7 +133,7 @@ export const NewPostPage: React.FC<NewPostPageProps> = ({ onCreatePost, onNaviga
             </div>
           </div>
 
-          {/* Price (only for For Sale/Services) */}
+          {/* Price & Links */}
           {formData.category === 'For Sale/Services' && (
             <div className="space-y-6">
               <div>
@@ -123,7 +148,7 @@ export const NewPostPage: React.FC<NewPostPageProps> = ({ onCreatePost, onNaviga
                     min="0"
                     step="0.01"
                     value={formData.price || ''}
-                    onChange={(e) => setFormData(prev => ({ ...prev, price: e.target.value ? parseFloat(e.target.value) : undefined }))}
+                    onChange={(e) => setFormData(prev => ({ ...prev, price: parseFloat(e.target.value) }))}
                     className="w-full pl-8 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
                     placeholder="0.00"
                     required
@@ -188,7 +213,7 @@ export const NewPostPage: React.FC<NewPostPageProps> = ({ onCreatePost, onNaviga
             <label className="block text-sm font-medium text-gray-700 mb-3">
               Photo (Optional)
             </label>
-            
+
             {formData.image ? (
               <div className="relative">
                 <img
@@ -223,7 +248,7 @@ export const NewPostPage: React.FC<NewPostPageProps> = ({ onCreatePost, onNaviga
             )}
           </div>
 
-          {/* Submit Button */}
+          {/* Submit */}
           <button
             type="submit"
             disabled={loading || !formData.title || !formData.description || (formData.category === 'For Sale/Services' && !formData.price)}
