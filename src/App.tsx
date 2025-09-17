@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { LoginPage } from './components/LoginPage';
 import { RegisterPage } from './components/RegisterPage';
 import { HomePage } from './components/HomePage';
@@ -7,153 +7,141 @@ import { ProfilePage } from './components/ProfilePage';
 import { LostPage } from './components/LostPage';
 import { FoundPage } from './components/FoundPage';
 import { ForSalePage } from './components/ForSalePage';
-import { User, Post } from './types';
-import { useGoogleAuth } from './hooks/useGoogleAuth';
+import { useAuth } from './hooks/useAuth';
+import { usePosts } from './hooks/usePosts';
 
 function App() {
   const [currentPage, setCurrentPage] = useState<'Login' | 'Register' | 'Home' | 'NewPost' | 'Profile' | 'Lost' | 'Found' | 'ForSale'>('Login');
-  const [currentUser, setCurrentUser] = useState<User | null>(null);
-  const [users, setUsers] = useState<User[]>([]);
-  const [posts, setPosts] = useState<Post[]>([]);
   const [activeCategory, setActiveCategory] = useState<'Lost' | 'Found' | 'For Sale/Services'>('Lost');
-  const { signInWithGoogle, googleUser } = useGoogleAuth();
+  
+  const { 
+    currentUser, 
+    loading: authLoading, 
+    error: authError,
+    signInWithGoogle,
+    signInWithEmail,
+    registerUser,
+    updateUserProfile,
+    signOut,
+    clearSession
+  } = useAuth();
 
-  // Load data from localStorage on app start
-  useEffect(() => {
-    const savedUsers = localStorage.getItem('complexConnect_users');
-    const savedPosts = localStorage.getItem('complexConnect_posts');
-    const savedCurrentUser = localStorage.getItem('complexConnect_currentUser');
+  const {
+    posts,
+    loading: postsLoading,
+    error: postsError,
+    addPost,
+    loadPostsByCategory,
+    getFilteredPosts
+  } = usePosts();
 
-    if (savedUsers) {
-      setUsers(JSON.parse(savedUsers));
-    }
-    if (savedPosts) {
-      setPosts(JSON.parse(savedPosts));
-    }
-    if (savedCurrentUser) {
-      setCurrentUser(JSON.parse(savedCurrentUser));
+  // Auto-navigate to home if user is logged in
+  React.useEffect(() => {
+    if (currentUser && currentPage === 'Login') {
       setCurrentPage('Home');
     }
-  }, []);
+  }, [currentUser, currentPage]);
 
-  // Save data to localStorage whenever it changes
-  useEffect(() => {
-    localStorage.setItem('complexConnect_users', JSON.stringify(users));
-  }, [users]);
-
-  useEffect(() => {
-    localStorage.setItem('complexConnect_posts', JSON.stringify(posts));
-  }, [posts]);
-
-  useEffect(() => {
-    if (currentUser) {
-      localStorage.setItem('complexConnect_currentUser', JSON.stringify(currentUser));
-    } else {
-      localStorage.removeItem('complexConnect_currentUser');
-    }
-  }, [currentUser]);
-
-  // Handle Google authentication result
-  useEffect(() => {
-    if (googleUser) {
-      // Check if user exists in our system
-      let existingUser = users.find(u => u.id === googleUser.id);
-      
-      if (!existingUser) {
-        // Create new user from Google data
-        const newUser: User = {
-          ...googleUser,
-          authProvider: 'google'
-        };
-        setUsers([...users, newUser]);
-        existingUser = newUser;
-      }
-      
-      setCurrentUser(existingUser);
-      
-      // If user hasn't set unit number, go to profile first
-      if (!existingUser.unitNumber) {
-        setCurrentPage('Profile');
-      } else {
-        setCurrentPage('Home');
-      }
-    }
-  }, [googleUser, users]);
-
-  const loginUser = (phone: string, password: string): boolean => {
-    const user = users.find(u => u.phone === phone && u.password === password);
-    if (user) {
-      setCurrentUser(user);
-      setCurrentPage('Home');
-      return true;
-    }
-    return false;
+  const handleLogin = async (email: string, password: string): Promise<boolean> => {
+    return await signInWithEmail(email, password);
   };
 
-  const loginWithGoogle = async (): Promise<void> => {
+  const handleGoogleLogin = async (): Promise<void> => {
     await signInWithGoogle();
   };
 
-  const registerUser = (userData: Omit<User, 'id' | 'profilePhoto'>): boolean => {
-    const existingUser = users.find(u => u.phone === userData.phone);
-    if (existingUser) {
-      return false;
+  const handleRegister = async (userData: any): Promise<boolean> => {
+    return await registerUser(userData);
+  };
+
+  const handleCreatePost = async (postData: any): Promise<boolean> => {
+    const success = await addPost(postData, currentUser);
+    if (success) {
+      setCurrentPage('Home');
     }
-
-    const newUser: User = {
-      ...userData,
-      id: Date.now().toString(),
-      profilePhoto: '',
-      authProvider: 'local'
-    };
-
-    setUsers([...users, newUser]);
-    setCurrentUser(newUser);
-    setCurrentPage('Home');
-    return true;
+    return success;
   };
 
-  const createPost = (postData: Omit<Post, 'id' | 'datePosted' | 'userPhone' | 'userName' | 'unitNumber'>): void => {
-    if (!currentUser) return;
-
-    const newPost: Post = {
-      ...postData,
-      id: Date.now().toString(),
-      datePosted: new Date(),
-      userPhone: currentUser.phone,
-      userName: currentUser.name,
-      unitNumber: currentUser.unitNumber
-    };
-
-    setPosts([newPost, ...posts]);
-    setCurrentPage('Home');
+  const handleUpdateProfile = async (userData: any): Promise<boolean> => {
+    const success = await updateUserProfile(userData);
+    if (success) {
+      setCurrentPage('Home');
+    }
+    return success;
   };
 
-  const updateProfile = (userData: Partial<User>): void => {
-    if (!currentUser) return;
+  const handleLogout = async (): Promise<void> => {
+    await signOut();
+    setCurrentPage('Login');
+  };
 
-    const updatedUser = { ...currentUser, ...userData };
-    setCurrentUser(updatedUser);
-    setUsers(users.map(u => u.id === currentUser.id ? updatedUser : u));
-    setCurrentPage('Home');
+  const handleClearSession = (): void => {
+    clearSession();
+    setCurrentPage('Login');
   };
 
   const navigate = (page: 'Login' | 'Register' | 'Home' | 'NewPost' | 'Profile' | 'Lost' | 'Found' | 'ForSale') => {
     setCurrentPage(page);
   };
 
-  const logout = () => {
-    setCurrentUser(null);
-    setCurrentPage('Login');
-  };
+  // Show loading state while authentication is being checked
+  if (authLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gray-50">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
+          <p className="mt-4 text-gray-600">Loading...</p>
+        </div>
+      </div>
+    );
+  }
 
-  const filteredPosts = posts.filter(post => post.category === activeCategory);
+  // Show error state if there's an authentication error
+  if (authError) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gray-50">
+        <div className="text-center">
+          <div className="text-red-600 text-lg font-semibold mb-4">Authentication Error</div>
+          <p className="text-gray-600 mb-4">{authError}</p>
+          <button 
+            onClick={handleClearSession}
+            className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors"
+          >
+            Try Again
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  // If no user is logged in, show login/register pages
+  if (!currentUser) {
+    return (
+      <div className="App">
+        {currentPage === 'Login' && (
+          <LoginPage
+            onLogin={handleLogin}
+            onGoogleLogin={handleGoogleLogin}
+            onNavigate={navigate}
+            onLogout={handleClearSession}
+            currentUser={currentUser}
+          />
+        )}
+        {currentPage === 'Register' && (
+          <RegisterPage
+            onRegister={handleRegister}
+            onGoogleLogin={handleGoogleLogin}
+            onNavigate={navigate}
+          />
+        )}
+      </div>
+    );
+  }
+
+  // User is logged in, show main app pages
+  const filteredPosts = getFilteredPosts(activeCategory);
 
   switch (currentPage) {
-    case 'Login':
-      return <LoginPage onLogin={loginUser} onGoogleLogin={loginWithGoogle} onNavigate={navigate} />;
-    case 'Register':
-      return <RegisterPage onRegister={registerUser} onGoogleLogin={loginWithGoogle} onNavigate={navigate} />;
     case 'Home':
       return (
         <HomePage
@@ -162,48 +150,62 @@ function App() {
           onCategoryChange={setActiveCategory}
           onNavigate={navigate}
           currentUser={currentUser}
-          onLogout={logout}
+          onLogout={handleLogout}
+          loading={postsLoading}
         />
       );
     case 'Lost':
       return (
         <LostPage
-          posts={posts.filter(post => post.category === 'Lost')}
+          posts={getFilteredPosts('Lost')}
           onNavigate={navigate}
           currentUser={currentUser}
-          onLogout={logout}
+          onLogout={handleLogout}
+          loading={postsLoading}
         />
       );
     case 'Found':
       return (
         <FoundPage
-          posts={posts.filter(post => post.category === 'Found')}
+          posts={getFilteredPosts('Found')}
           onNavigate={navigate}
           currentUser={currentUser}
-          onLogout={logout}
+          onLogout={handleLogout}
+          loading={postsLoading}
         />
       );
     case 'ForSale':
       return (
         <ForSalePage
-          posts={posts.filter(post => post.category === 'For Sale/Services')}
+          posts={getFilteredPosts('For Sale/Services')}
           onNavigate={navigate}
           currentUser={currentUser}
-          onLogout={logout}
+          onLogout={handleLogout}
+          loading={postsLoading}
         />
       );
     case 'NewPost':
-      return <NewPostPage onCreatePost={createPost} onNavigate={navigate} />;
+      return <NewPostPage onCreatePost={handleCreatePost} onNavigate={navigate} />;
     case 'Profile':
       return (
         <ProfilePage
           user={currentUser}
-          onUpdateProfile={updateProfile}
+          onUpdateProfile={handleUpdateProfile}
           onNavigate={navigate}
         />
       );
     default:
-      return <LoginPage onLogin={loginUser} onNavigate={navigate} />;
+      return (
+        <HomePage
+          posts={filteredPosts}
+          activeCategory={activeCategory}
+          onCategoryChange={setActiveCategory}
+          onNavigate={navigate}
+          currentUser={currentUser}
+          onLogout={handleLogout}
+          loading={postsLoading}
+        />
+      );
   }
 }
 

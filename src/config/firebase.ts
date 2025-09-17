@@ -1,22 +1,29 @@
 import { initializeApp } from 'firebase/app';
-import { getAuth, GoogleAuthProvider } from 'firebase/auth';
+import { getAuth, GoogleAuthProvider, onAuthStateChanged, User as FirebaseUser } from 'firebase/auth';
+import { getFirestore } from 'firebase/firestore';
+import { getStorage } from 'firebase/storage';
 
 const firebaseConfig = {
-  // These would normally come from environment variables
-  // For demo purposes, using placeholder values
-  apiKey: "demo-api-key",
-  authDomain: "complex-connect-demo.firebaseapp.com",
-  projectId: "complex-connect-demo",
-  storageBucket: "complex-connect-demo.appspot.com",
-  messagingSenderId: "123456789",
-  appId: "1:123456789:web:abcdef123456"
+  apiKey: import.meta.env.VITE_FIREBASE_API_KEY || "demo-api-key",
+  authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN || "complex-connect-demo.firebaseapp.com",
+  projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID || "complex-connect-demo",
+  storageBucket: import.meta.env.VITE_FIREBASE_STORAGE_BUCKET || "complex-connect-demo.appspot.com",
+  messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID || "123456789",
+  appId: import.meta.env.VITE_FIREBASE_APP_ID || "1:123456789:web:abcdef123456"
 };
 
 const app = initializeApp(firebaseConfig);
 export const auth = getAuth(app);
+export const db = getFirestore(app);
+export const storage = getStorage(app);
 export const googleProvider = new GoogleAuthProvider();
 
 // Configure Google provider
 googleProvider.setCustomParameters({
   prompt: 'select_account'
 });
+
+// Auth state observer
+export const onAuthStateChange = (callback: (user: FirebaseUser | null) => void) => {
+  return onAuthStateChanged(auth, callback);
+};

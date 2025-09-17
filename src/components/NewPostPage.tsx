@@ -1,8 +1,6 @@
 import React, { useState } from 'react';
 import { ArrowLeft, Upload, X, Send, Globe, Share2 } from 'lucide-react';
-import imageCompression from 'browser-image-compression';
-import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
-import { storage } from '../config/firebase';
+import { uploadImage } from '../services/storageService';
 
 interface NewPostPageProps {
   onCreatePost: (postData: {
@@ -10,6 +8,7 @@ interface NewPostPageProps {
     description: string;
     category: 'Lost' | 'Found' | 'For Sale/Services';
     image: string;
+    imagePath?: string;
     price?: number;
     website?: string;
     socialMedia?: string;
@@ -23,6 +22,7 @@ export const NewPostPage: React.FC<NewPostPageProps> = ({ onCreatePost, onNaviga
     description: '',
     category: 'Lost' as 'Lost' | 'Found' | 'For Sale/Services',
     image: '',
+    imagePath: '',
     price: undefined as number | undefined,
     website: '',
     socialMedia: ''
@@ -43,29 +43,30 @@ export const NewPostPage: React.FC<NewPostPageProps> = ({ onCreatePost, onNaviga
     const file = e.target.files?.[0];
     if (!file) return;
 
+    setLoading(true);
     try {
-      // 1. Compress
-      const compressedFile = await imageCompression(file, {
-        maxSizeMB: 0.5,
-        maxWidthOrHeight: 1024,
-        useWebWorker: true,
-      });
-
-      // 2. Upload to Firebase
-      const imageRef = ref(storage, `images/${Date.now()}_${compressedFile.name}`);
-      await uploadBytes(imageRef, compressedFile);
-      const url = await getDownloadURL(imageRef);
-
-      // 3. Update formData
-      setFormData(prev => ({ ...prev, image: url }));
+      // Generate a temporary user ID for upload (will be replaced with actual user ID in production)
+      const tempUserId = 'temp_user_' + Date.now();
+      const result = await uploadImage(file, tempUserId);
+      
+      setFormData(prev => ({ 
+        ...prev, 
+        image: result.url,
+        imagePath: result.path
+      }));
+      
+      // Show success feedback
+      console.log('Image uploaded successfully:', result.url);
     } catch (error) {
       console.error("Image upload failed:", error);
-      alert("Failed to upload image.");
+      alert("Failed to upload image. Please try again.");
+    } finally {
+      setLoading(false);
     }
   };
 
   const removeImage = () => {
-    setFormData(prev => ({ ...prev, image: '' }));
+    setFormData(prev => ({ ...prev, image: '', imagePath: '' }));
   };
 
   const categories = [
@@ -105,26 +106,26 @@ export const NewPostPage: React.FC<NewPostPageProps> = ({ onCreatePost, onNaviga
               value={formData.title}
               onChange={(e) => setFormData(prev => ({ ...prev, title: e.target.value }))}
               className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
-              placeholder="What's this about?"
+              placeholder="Enter a descriptive title"
               required
             />
           </div>
 
           {/* Category */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-3">
+            <label className="block text-sm font-medium text-gray-700 mb-2">
               Category *
             </label>
-            <div className="grid grid-cols-3 gap-3">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
               {categories.map((category) => (
                 <button
                   key={category.value}
                   type="button"
-                  onClick={() => setFormData(prev => ({ ...prev, category: category.value as any }))}
-                  className={`p-3 rounded-lg border font-medium transition-all duration-200 ${
+                  onClick={() => setFormData(prev => ({ ...prev, category: category.value as 'Lost' | 'Found' | 'For Sale/Services' }))}
+                  className={`p-3 rounded-lg border-2 transition-all duration-200 ${
                     formData.category === category.value
-                      ? 'bg-blue-500 text-white border-blue-500'
-                      : `${category.color} border hover:shadow-md`
+                      ? `${category.color} border-transparent`
+                      : `${category.color} hover:shadow-md`
                   }`}
                 >
                   {category.label}
@@ -132,65 +133,6 @@ export const NewPostPage: React.FC<NewPostPageProps> = ({ onCreatePost, onNaviga
               ))}
             </div>
           </div>
-
-          {/* Price & Links */}
-          {formData.category === 'For Sale/Services' && (
-            <div className="space-y-6">
-              <div>
-                <label htmlFor="price" className="block text-sm font-medium text-gray-700 mb-2">
-                  Price (RANDS) *
-                </label>
-                <div className="relative">
-                  <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500 font-medium">R</span>
-                  <input
-                    id="price"
-                    type="number"
-                    min="0"
-                    step="0.01"
-                    value={formData.price || ''}
-                    onChange={(e) => setFormData(prev => ({ ...prev, price: parseFloat(e.target.value) }))}
-                    className="w-full pl-8 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
-                    placeholder="0.00"
-                    required
-                  />
-                </div>
-              </div>
-
-              <div>
-                <label htmlFor="website" className="block text-sm font-medium text-gray-700 mb-2">
-                  Website (Optional)
-                </label>
-                <div className="relative">
-                  <Globe className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
-                  <input
-                    id="website"
-                    type="url"
-                    value={formData.website}
-                    onChange={(e) => setFormData(prev => ({ ...prev, website: e.target.value }))}
-                    className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
-                    placeholder="https://your-website.com"
-                  />
-                </div>
-              </div>
-
-              <div>
-                <label htmlFor="socialMedia" className="block text-sm font-medium text-gray-700 mb-2">
-                  Social Media Link (Optional)
-                </label>
-                <div className="relative">
-                  <Share2 className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
-                  <input
-                    id="socialMedia"
-                    type="url"
-                    value={formData.socialMedia}
-                    onChange={(e) => setFormData(prev => ({ ...prev, socialMedia: e.target.value }))}
-                    className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
-                    placeholder="https://instagram.com/yourprofile"
-                  />
-                </div>
-              </div>
-            </div>
-          )}
 
           {/* Description */}
           <div>
@@ -202,24 +144,23 @@ export const NewPostPage: React.FC<NewPostPageProps> = ({ onCreatePost, onNaviga
               value={formData.description}
               onChange={(e) => setFormData(prev => ({ ...prev, description: e.target.value }))}
               rows={4}
-              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 resize-none"
-              placeholder="Provide more details..."
+              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
+              placeholder="Provide detailed information about your post"
               required
             />
           </div>
 
           {/* Image Upload */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-3">
-              Photo (Optional)
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              Image (Optional)
             </label>
-
             {formData.image ? (
               <div className="relative">
                 <img
                   src={formData.image}
                   alt="Preview"
-                  className="w-full h-48 object-cover rounded-lg border border-gray-300"
+                  className="w-full h-48 object-cover rounded-lg"
                 />
                 <button
                   type="button"
@@ -230,36 +171,102 @@ export const NewPostPage: React.FC<NewPostPageProps> = ({ onCreatePost, onNaviga
                 </button>
               </div>
             ) : (
-              <label className="flex flex-col items-center justify-center w-full h-32 border-2 border-gray-300 border-dashed rounded-lg cursor-pointer bg-gray-50 hover:bg-gray-100 transition-colors duration-200">
-                <div className="flex flex-col items-center justify-center pt-5 pb-6">
-                  <Upload className="w-8 h-8 mb-2 text-gray-400" />
-                  <p className="text-sm text-gray-600">
-                    <span className="font-semibold">Click to upload</span> or drag and drop
-                  </p>
-                  <p className="text-xs text-gray-500">PNG, JPG, GIF up to 10MB</p>
-                </div>
+              <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center">
+                <Upload className="w-8 h-8 text-gray-400 mx-auto mb-2" />
+                <p className="text-gray-600 mb-2">Upload an image to your post</p>
                 <input
                   type="file"
-                  className="hidden"
                   accept="image/*"
                   onChange={handleImageUpload}
+                  className="hidden"
+                  id="image-upload"
+                  disabled={loading}
                 />
-              </label>
+                <label
+                  htmlFor="image-upload"
+                  className={`inline-flex items-center px-4 py-2 rounded-lg transition-colors duration-200 cursor-pointer ${
+                    loading 
+                      ? 'bg-gray-400 text-white cursor-not-allowed' 
+                      : 'bg-blue-600 text-white hover:bg-blue-700'
+                  }`}
+                >
+                  <Upload className="w-4 h-4 mr-2" />
+                  {loading ? 'Uploading...' : 'Choose Image'}
+                </label>
+              </div>
             )}
           </div>
 
-          {/* Submit */}
+          {/* Price (for For Sale/Services) */}
+          {formData.category === 'For Sale/Services' && (
+            <div>
+              <label htmlFor="price" className="block text-sm font-medium text-gray-700 mb-2">
+                Price (R)
+              </label>
+              <input
+                id="price"
+                type="number"
+                value={formData.price || ''}
+                onChange={(e) => setFormData(prev => ({ ...prev, price: e.target.value ? Number(e.target.value) : undefined }))}
+                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
+                placeholder="Enter price in Rands"
+                min="0"
+              />
+            </div>
+          )}
+
+          {/* Website (for For Sale/Services) */}
+          {formData.category === 'For Sale/Services' && (
+            <div>
+              <label htmlFor="website" className="block text-sm font-medium text-gray-700 mb-2">
+                Website URL
+              </label>
+              <div className="relative">
+                <Globe className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
+                <input
+                  id="website"
+                  type="url"
+                  value={formData.website}
+                  onChange={(e) => setFormData(prev => ({ ...prev, website: e.target.value }))}
+                  className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
+                  placeholder="https://your-website.com"
+                />
+              </div>
+            </div>
+          )}
+
+          {/* Social Media (for For Sale/Services) */}
+          {formData.category === 'For Sale/Services' && (
+            <div>
+              <label htmlFor="socialMedia" className="block text-sm font-medium text-gray-700 mb-2">
+                Social Media Link
+              </label>
+              <div className="relative">
+                <Share2 className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
+                <input
+                  id="socialMedia"
+                  type="url"
+                  value={formData.socialMedia}
+                  onChange={(e) => setFormData(prev => ({ ...prev, socialMedia: e.target.value }))}
+                  className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
+                  placeholder="https://instagram.com/your-profile"
+                />
+              </div>
+            </div>
+          )}
+
+          {/* Submit Button */}
           <button
             type="submit"
-            disabled={loading || !formData.title || !formData.description || (formData.category === 'For Sale/Services' && !formData.price)}
-            className="w-full bg-gradient-to-r from-blue-600 to-teal-600 text-white py-3 px-4 rounded-lg font-semibold hover:from-blue-700 hover:to-teal-700 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+            disabled={loading}
+            className="w-full bg-gradient-to-r from-blue-600 to-teal-600 text-white py-4 px-6 rounded-lg font-semibold hover:from-blue-700 hover:to-teal-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center"
           >
             {loading ? (
-              <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
+              <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>
             ) : (
               <>
-                <Send className="w-5 h-5" />
-                Post Now
+                Create Post
+                <Send className="ml-2 w-5 h-5" />
               </>
             )}
           </button>

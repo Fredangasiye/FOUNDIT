@@ -9,7 +9,8 @@ interface HomePageProps {
   onCategoryChange: (category: 'Lost' | 'Found' | 'For Sale/Services') => void;
   onNavigate: (page: 'NewPost' | 'Profile' | 'Lost' | 'Found' | 'ForSale') => void;
   currentUser: UserType | null;
-  onLogout: () => void; // Keep for compatibility, but will use as share function
+  onLogout: () => void;
+  loading?: boolean;
 }
 
 export const HomePage: React.FC<HomePageProps> = ({
@@ -18,7 +19,8 @@ export const HomePage: React.FC<HomePageProps> = ({
   onCategoryChange,
   onNavigate,
   currentUser,
-  onLogout
+  onLogout,
+  loading = false
 }) => {
   const categories = [
     { name: 'Lost', color: 'bg-red-100 text-red-800 border-red-200', activeColor: 'bg-red-500 text-white' },
@@ -32,7 +34,7 @@ export const HomePage: React.FC<HomePageProps> = ({
 
   const handleShare = async () => {
     const shareData = {
-      title: 'Huntingdon Terrace Connect',
+      title: 'FOUNDIT',
       text: 'Join our community platform to connect with neighbors!',
       url: window.location.origin
     };
@@ -51,6 +53,7 @@ export const HomePage: React.FC<HomePageProps> = ({
       alert('Link copied to clipboard!');
     }
   };
+
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Header Image */}
@@ -59,7 +62,7 @@ export const HomePage: React.FC<HomePageProps> = ({
         <div className="absolute inset-0 bg-gradient-to-br from-transparent via-white/10 to-transparent"></div>
         <div className="relative h-full flex items-center justify-center">
           <div className="text-center text-white">
-            <h1 className="text-4xl font-bold mb-2 drop-shadow-lg">Huntingdon Terrace Connect</h1>
+            <h1 className="text-4xl font-bold mb-2 drop-shadow-lg">FOUNDIT</h1>
             <p className="text-xl opacity-90 drop-shadow">Your Community, Connected</p>
           </div>
         </div>
@@ -89,6 +92,12 @@ export const HomePage: React.FC<HomePageProps> = ({
               >
                 <Share2 className="w-6 h-6" />
               </button>
+              <button
+                onClick={onLogout}
+                className="px-3 py-1 text-sm text-red-600 hover:text-red-700 hover:bg-red-50 rounded-md transition-all duration-200"
+              >
+                Logout
+              </button>
             </div>
           </div>
         </div>
@@ -101,14 +110,17 @@ export const HomePage: React.FC<HomePageProps> = ({
             {categories.map((category) => (
               <button
                 key={category.name}
-                onClick={() => {
-                  if (category.name === 'Lost') onNavigate('Lost');
-                  else if (category.name === 'Found') onNavigate('Found');
-                  else if (category.name === 'For Sale/Services') onNavigate('ForSale');
-                }}
-                className={`px-4 py-3 rounded-lg font-medium transition-all duration-200 border text-center ${category.color} border hover:shadow-md whitespace-nowrap`}
+                onClick={() => onCategoryChange(category.name as 'Lost' | 'Found' | 'For Sale/Services')}
+                className={`relative p-4 rounded-lg border-2 transition-all duration-200 ${
+                  activeCategory === category.name
+                    ? `${category.activeColor} border-transparent`
+                    : `${category.color} hover:shadow-md`
+                }`}
               >
-                {category.name} ({getCategoryCount(category.name as 'Lost' | 'Found' | 'For Sale/Services')})
+                <div className="text-center">
+                  <div className="font-semibold text-lg">{category.name}</div>
+                  <div className="text-sm opacity-75">{getCategoryCount(category.name as 'Lost' | 'Found' | 'For Sale/Services')} posts</div>
+                </div>
               </button>
             ))}
           </div>
@@ -117,25 +129,42 @@ export const HomePage: React.FC<HomePageProps> = ({
 
       {/* Content */}
       <div className="max-w-4xl mx-auto px-4 py-6">
-        {/* Create Post Button */}
-        <button
-          onClick={() => onNavigate('NewPost')}
-          className="w-full bg-gradient-to-r from-blue-600 to-teal-600 text-white py-4 px-6 rounded-xl font-semibold hover:from-blue-700 hover:to-teal-700 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-all duration-200 flex items-center justify-center gap-2 mb-6 shadow-lg"
-        >
-          <Plus className="w-5 h-5" />
-          Post Something
-        </button>
+        {/* New Post Button */}
+        <div className="mb-6">
+          <button
+            onClick={() => onNavigate('NewPost')}
+            className="w-full bg-gradient-to-r from-blue-600 to-teal-600 text-white py-4 px-6 rounded-lg font-semibold hover:from-blue-700 hover:to-teal-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-all duration-200 flex items-center justify-center gap-2"
+          >
+            <Plus className="w-6 h-6" />
+            Create New Post
+          </button>
+        </div>
 
-        {/* Posts List */}
-        <div className="space-y-4">
+        {/* Posts */}
+        {loading ? (
+          <div className="text-center py-12">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
+            <p className="text-gray-600">Loading posts...</p>
+          </div>
+        ) : posts.length === 0 ? (
           <div className="text-center py-12">
             <MessageCircle className="w-16 h-16 text-gray-300 mx-auto mb-4" />
-            <h3 className="text-lg font-semibold text-gray-700 mb-2">Welcome to Huntingdon Terrace Connect</h3>
-            <p className="text-gray-500 mb-6">
-              Connect with your neighbors! Click on a category above to view posts or create your own.
-            </p>
+            <h3 className="text-lg font-semibold text-gray-900 mb-2">No posts yet</h3>
+            <p className="text-gray-600 mb-4">Be the first to create a post in the {activeCategory} category!</p>
+            <button
+              onClick={() => onNavigate('NewPost')}
+              className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors duration-200"
+            >
+              Create Post
+            </button>
           </div>
-        </div>
+        ) : (
+          <div className="space-y-4">
+            {posts.map((post) => (
+              <PostCard key={post.id} post={post} />
+            ))}
+          </div>
+        )}
       </div>
     </div>
   );
