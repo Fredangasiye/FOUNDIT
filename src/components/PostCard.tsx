@@ -153,9 +153,10 @@ export const PostCard: React.FC<PostCardProps> = ({ post }) => {
               onClick={handleWhatsAppClick}
               className="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-lg font-medium transition-colors duration-200 flex items-center gap-2 shadow-md hover:shadow-lg"
             >
-            <MessageCircle className="w-4 h-4" />
-            WhatsApp
-          </button>
+              <MessageCircle className="w-4 h-4" />
+              WhatsApp
+            </button>
+          </div>
         </div>
       </div>
     </div>
