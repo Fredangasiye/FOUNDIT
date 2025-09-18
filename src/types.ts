@@ -20,7 +20,12 @@ export interface Post {
   website?: string; // Website URL for For Sale/Services posts
   socialMedia?: string; // Social media link for For Sale/Services posts
   datePosted: Date;
-  userPhone: string;
-  userName: string;
+  // Contact Information
+  contactName: string;
+  contactPhone: string;
+  contactWhatsApp: string;
+  contactEmail: string;
   unitNumber: string;
+  // Admin fields
+  isAdminPost?: boolean;
 }

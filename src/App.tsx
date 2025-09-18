@@ -7,8 +7,8 @@ import { ProfilePage } from './components/ProfilePage';
 import { LostPage } from './components/LostPage';
 import { FoundPage } from './components/FoundPage';
 import { ForSalePage } from './components/ForSalePage';
-import { useAuth } from './hooks/useAuth';
-import { usePosts } from './hooks/usePosts';
+import { useAuth } from './hooks/useAuthDemo';
+import { usePosts } from './hooks/usePostsDemo';
 
 function App() {
   const [currentPage, setCurrentPage] = useState<'Login' | 'Register' | 'Home' | 'NewPost' | 'Profile' | 'Lost' | 'Found' | 'ForSale'>('Login');

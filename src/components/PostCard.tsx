@@ -8,9 +8,17 @@ interface PostCardProps {
 
 export const PostCard: React.FC<PostCardProps> = ({ post }) => {
   const handleWhatsAppClick = () => {
-    const message = encodeURIComponent(`Hi! I saw your post on Huntingdon Terrace Connect about "${post.title}".`);
-    const whatsappUrl = `https://wa.me/${post.userPhone}?text=${message}`;
+    const message = encodeURIComponent(`Hi! I saw your post on FOUNDIT about "${post.title}".`);
+    const whatsappUrl = `https://wa.me/${post.contactWhatsApp || post.contactPhone}?text=${message}`;
     window.open(whatsappUrl, '_blank');
+  };
+
+  const handlePhoneClick = () => {
+    window.open(`tel:${post.contactPhone}`, '_self');
+  };
+
+  const handleEmailClick = () => {
+    window.open(`mailto:${post.contactEmail}`, '_self');
   };
 
   const formatDate = (date: Date) => {
@@ -107,15 +115,44 @@ export const PostCard: React.FC<PostCardProps> = ({ post }) => {
           </div>
         )}
 
-        {/* Footer */}
-        <div className="flex items-center justify-between">
-          <div className="text-sm text-gray-600">
-            <span className="font-medium">By {post.userName}</span>
+        {/* Contact Information */}
+        <div className="border-t pt-4">
+          <h4 className="font-semibold text-gray-900 mb-3">Contact Information</h4>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mb-4">
+            <div className="text-sm">
+              <span className="text-gray-600">Name:</span>
+              <span className="ml-2 font-medium">{post.contactName}</span>
+            </div>
+            <div className="text-sm">
+              <span className="text-gray-600">Unit:</span>
+              <span className="ml-2 font-medium">{post.unitNumber}</span>
+            </div>
+            <div className="text-sm">
+              <span className="text-gray-600">Phone:</span>
+              <button
+                onClick={handlePhoneClick}
+                className="ml-2 font-medium text-blue-600 hover:text-blue-800 underline"
+              >
+                {post.contactPhone}
+              </button>
+            </div>
+            <div className="text-sm">
+              <span className="text-gray-600">Email:</span>
+              <button
+                onClick={handleEmailClick}
+                className="ml-2 font-medium text-blue-600 hover:text-blue-800 underline"
+              >
+                {post.contactEmail}
+              </button>
+            </div>
           </div>
-          <button
-            onClick={handleWhatsAppClick}
-            className="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-lg font-medium transition-colors duration-200 flex items-center gap-2 shadow-md hover:shadow-lg"
-          >
+          
+          {/* Contact Buttons */}
+          <div className="flex flex-wrap gap-2">
+            <button
+              onClick={handleWhatsAppClick}
+              className="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-lg font-medium transition-colors duration-200 flex items-center gap-2 shadow-md hover:shadow-lg"
+            >
             <MessageCircle className="w-4 h-4" />
             WhatsApp
           </button>

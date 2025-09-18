@@ -1,16 +1,18 @@
-import React from 'react';
-import { Plus, User, Share2, MessageCircle } from 'lucide-react';
-import { User as UserType, Post } from '../types';
+import React, { useState } from 'react';
+import { Plus, User, Share2, MessageCircle, Shield, LogOut, LogIn } from 'lucide-react';
+import { Post } from '../types';
 import { PostCard } from './PostCard';
 
 interface HomePageProps {
   posts: Post[];
   activeCategory: 'Lost' | 'Found' | 'For Sale/Services';
   onCategoryChange: (category: 'Lost' | 'Found' | 'For Sale/Services') => void;
-  onNavigate: (page: 'NewPost' | 'Profile' | 'Lost' | 'Found' | 'ForSale') => void;
-  currentUser: UserType | null;
-  onLogout: () => void;
+  onNavigate: (page: 'NewPost' | 'Lost' | 'Found' | 'ForSale') => void;
   loading?: boolean;
+  isAdmin?: boolean;
+  onAdminLogin?: (email: string, phone: string) => boolean;
+  onAdminLogout?: () => void;
+  onDeletePost?: (postId: string) => Promise<boolean>;
 }
 
 export const HomePage: React.FC<HomePageProps> = ({
@@ -18,15 +20,39 @@ export const HomePage: React.FC<HomePageProps> = ({
   activeCategory,
   onCategoryChange,
   onNavigate,
-  currentUser,
-  onLogout,
-  loading = false
+  loading = false,
+  isAdmin = false,
+  onAdminLogin,
+  onAdminLogout,
+  onDeletePost
 }) => {
+  const [showAdminLogin, setShowAdminLogin] = useState(false);
+  const [adminEmail, setAdminEmail] = useState('');
+  const [adminPhone, setAdminPhone] = useState('');
   const categories = [
     { name: 'Lost', color: 'bg-red-100 text-red-800 border-red-200', activeColor: 'bg-red-500 text-white' },
     { name: 'Found', color: 'bg-green-100 text-green-800 border-green-200', activeColor: 'bg-green-500 text-white' },
     { name: 'For Sale/Services', color: 'bg-blue-100 text-blue-800 border-blue-200', activeColor: 'bg-blue-500 text-white' }
   ];
+
+  const handleAdminLogin = () => {
+    if (onAdminLogin && adminEmail && adminPhone) {
+      const success = onAdminLogin(adminEmail, adminPhone);
+      if (success) {
+        setShowAdminLogin(false);
+        setAdminEmail('');
+        setAdminPhone('');
+      } else {
+        alert('Invalid admin credentials');
+      }
+    }
+  };
+
+  const handleDeletePost = async (postId: string) => {
+    if (onDeletePost && window.confirm('Are you sure you want to delete this post?')) {
+      await onDeletePost(postId);
+    }
+  };
 
   const getCategoryCount = (category: 'Lost' | 'Found' | 'For Sale/Services') => {
     return posts.filter(post => post.category === category).length;
@@ -77,26 +103,38 @@ export const HomePage: React.FC<HomePageProps> = ({
         <div className="max-w-4xl mx-auto px-4 py-4">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-gray-600">Welcome back, {currentUser?.name}</p>
+              <p className="text-gray-600">Community Posts</p>
             </div>
             <div className="flex items-center gap-3">
-              <button
-                onClick={() => onNavigate('Profile')}
-                className="p-2 text-gray-600 hover:text-blue-600 hover:bg-blue-50 rounded-full transition-all duration-200"
-              >
-                <User className="w-6 h-6" />
-              </button>
+              {isAdmin ? (
+                <>
+                  <span className="text-sm text-green-600 font-medium flex items-center gap-1">
+                    <Shield className="w-4 h-4" />
+                    Admin
+                  </span>
+                  <button
+                    onClick={onAdminLogout}
+                    className="p-2 text-gray-600 hover:text-red-600 hover:bg-red-50 rounded-full transition-all duration-200"
+                    title="Logout Admin"
+                  >
+                    <LogOut className="w-6 h-6" />
+                  </button>
+                </>
+              ) : (
+                <button
+                  onClick={() => setShowAdminLogin(true)}
+                  className="p-2 text-gray-600 hover:text-blue-600 hover:bg-blue-50 rounded-full transition-all duration-200"
+                  title="Admin Login"
+                >
+                  <LogIn className="w-6 h-6" />
+                </button>
+              )}
               <button
                 onClick={handleShare}
                 className="p-2 text-gray-600 hover:text-blue-600 hover:bg-blue-50 rounded-full transition-all duration-200"
+                title="Share"
               >
                 <Share2 className="w-6 h-6" />
-              </button>
-              <button
-                onClick={onLogout}
-                className="px-3 py-1 text-sm text-red-600 hover:text-red-700 hover:bg-red-50 rounded-md transition-all duration-200"
-              >
-                Logout
               </button>
             </div>
           </div>
@@ -161,11 +199,73 @@ export const HomePage: React.FC<HomePageProps> = ({
         ) : (
           <div className="space-y-4">
             {posts.map((post) => (
-              <PostCard key={post.id} post={post} />
+              <div key={post.id} className="relative">
+                <PostCard post={post} />
+                {isAdmin && (
+                  <button
+                    onClick={() => handleDeletePost(post.id)}
+                    className="absolute top-2 right-2 bg-red-500 hover:bg-red-600 text-white p-2 rounded-full shadow-lg transition-colors duration-200"
+                    title="Delete Post"
+                  >
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                  </button>
+                )}
+              </div>
             ))}
           </div>
         )}
       </div>
+
+      {/* Admin Login Modal */}
+      {showAdminLogin && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg p-6 w-full max-w-md mx-4">
+            <h3 className="text-lg font-semibold text-gray-900 mb-4">Admin Login</h3>
+            <div className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Email
+                </label>
+                <input
+                  type="email"
+                  value={adminEmail}
+                  onChange={(e) => setAdminEmail(e.target.value)}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  placeholder="admin@foundit.com"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Phone
+                </label>
+                <input
+                  type="tel"
+                  value={adminPhone}
+                  onChange={(e) => setAdminPhone(e.target.value)}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  placeholder="+1234567890"
+                />
+              </div>
+            </div>
+            <div className="flex gap-3 mt-6">
+              <button
+                onClick={() => setShowAdminLogin(false)}
+                className="flex-1 px-4 py-2 text-gray-600 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors duration-200"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleAdminLogin}
+                className="flex-1 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors duration-200"
+              >
+                Login
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

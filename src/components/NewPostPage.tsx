@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { ArrowLeft, Upload, X, Send, Globe, Share2 } from 'lucide-react';
-import { uploadImage } from '../services/storageService';
+import { uploadImage } from '../services/storageServiceDemo';
 
 interface NewPostPageProps {
   onCreatePost: (postData: {
@@ -12,6 +12,11 @@ interface NewPostPageProps {
     price?: number;
     website?: string;
     socialMedia?: string;
+    contactName: string;
+    contactPhone: string;
+    contactWhatsApp: string;
+    contactEmail: string;
+    unitNumber: string;
   }) => void;
   onNavigate: (page: 'Home') => void;
 }
@@ -25,13 +30,21 @@ export const NewPostPage: React.FC<NewPostPageProps> = ({ onCreatePost, onNaviga
     imagePath: '',
     price: undefined as number | undefined,
     website: '',
-    socialMedia: ''
+    socialMedia: '',
+    contactName: '',
+    contactPhone: '',
+    contactWhatsApp: '',
+    contactEmail: '',
+    unitNumber: ''
   });
   const [loading, setLoading] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!formData.title || !formData.description) return;
+    if (!formData.title || !formData.description || !formData.contactName || !formData.contactPhone || !formData.contactEmail || !formData.unitNumber) {
+      alert('Please fill in all required fields including contact information');
+      return;
+    }
 
     setLoading(true);
     await new Promise(resolve => setTimeout(resolve, 500));
@@ -254,6 +267,90 @@ export const NewPostPage: React.FC<NewPostPageProps> = ({ onCreatePost, onNaviga
               </div>
             </div>
           )}
+
+          {/* Contact Information Section */}
+          <div className="border-t pt-6">
+            <h3 className="text-lg font-semibold text-gray-900 mb-4">Contact Information *</h3>
+            
+            {/* Contact Name */}
+            <div className="mb-4">
+              <label htmlFor="contactName" className="block text-sm font-medium text-gray-700 mb-2">
+                Your Name *
+              </label>
+              <input
+                id="contactName"
+                type="text"
+                value={formData.contactName}
+                onChange={(e) => setFormData(prev => ({ ...prev, contactName: e.target.value }))}
+                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
+                placeholder="Enter your full name"
+                required
+              />
+            </div>
+
+            {/* Unit Number */}
+            <div className="mb-4">
+              <label htmlFor="unitNumber" className="block text-sm font-medium text-gray-700 mb-2">
+                Unit Number *
+              </label>
+              <input
+                id="unitNumber"
+                type="text"
+                value={formData.unitNumber}
+                onChange={(e) => setFormData(prev => ({ ...prev, unitNumber: e.target.value }))}
+                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
+                placeholder="e.g., 4B, 205, etc."
+                required
+              />
+            </div>
+
+            {/* Contact Phone */}
+            <div className="mb-4">
+              <label htmlFor="contactPhone" className="block text-sm font-medium text-gray-700 mb-2">
+                Phone Number *
+              </label>
+              <input
+                id="contactPhone"
+                type="tel"
+                value={formData.contactPhone}
+                onChange={(e) => setFormData(prev => ({ ...prev, contactPhone: e.target.value }))}
+                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
+                placeholder="+1234567890"
+                required
+              />
+            </div>
+
+            {/* WhatsApp */}
+            <div className="mb-4">
+              <label htmlFor="contactWhatsApp" className="block text-sm font-medium text-gray-700 mb-2">
+                WhatsApp Number
+              </label>
+              <input
+                id="contactWhatsApp"
+                type="tel"
+                value={formData.contactWhatsApp}
+                onChange={(e) => setFormData(prev => ({ ...prev, contactWhatsApp: e.target.value }))}
+                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
+                placeholder="+1234567890 (optional)"
+              />
+            </div>
+
+            {/* Contact Email */}
+            <div className="mb-4">
+              <label htmlFor="contactEmail" className="block text-sm font-medium text-gray-700 mb-2">
+                Email Address *
+              </label>
+              <input
+                id="contactEmail"
+                type="email"
+                value={formData.contactEmail}
+                onChange={(e) => setFormData(prev => ({ ...prev, contactEmail: e.target.value }))}
+                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
+                placeholder="your.email@example.com"
+                required
+              />
+            </div>
+          </div>
 
           {/* Submit Button */}
           <button
