@@ -43,7 +43,23 @@ export const NewPostPage: React.FC<NewPostPageProps> = ({ onCreatePost, onNaviga
   // Auto-sync WhatsApp number when phone number changes and sync is enabled
   React.useEffect(() => {
     if (syncWhatsApp && formData.contactPhone) {
-      setFormData(prev => ({ ...prev, contactWhatsApp: formData.contactPhone }));
+      // Extract just the number part (remove any existing country code)
+      let phoneNumber = formData.contactPhone;
+      
+      // Remove common country codes if they exist
+      if (phoneNumber.startsWith('+27')) {
+        phoneNumber = phoneNumber.substring(3).trim();
+      } else if (phoneNumber.startsWith('27')) {
+        phoneNumber = phoneNumber.substring(2).trim();
+      } else if (phoneNumber.startsWith('0')) {
+        phoneNumber = phoneNumber.substring(1);
+      }
+      
+      // Set WhatsApp with +27 country code and the cleaned number
+      setFormData(prev => ({ 
+        ...prev, 
+        contactWhatsApp: `+27 ${phoneNumber}` 
+      }));
     }
   }, [formData.contactPhone, syncWhatsApp]);
 
@@ -375,9 +391,22 @@ export const NewPostPage: React.FC<NewPostPageProps> = ({ onCreatePost, onNaviga
                     onChange={(e) => {
                       setSyncWhatsApp(e.target.checked);
                       if (e.target.checked && formData.contactPhone) {
+                        // Extract just the number part (remove any existing country code)
+                        let phoneNumber = formData.contactPhone;
+                        
+                        // Remove common country codes if they exist
+                        if (phoneNumber.startsWith('+27')) {
+                          phoneNumber = phoneNumber.substring(3).trim();
+                        } else if (phoneNumber.startsWith('27')) {
+                          phoneNumber = phoneNumber.substring(2).trim();
+                        } else if (phoneNumber.startsWith('0')) {
+                          phoneNumber = phoneNumber.substring(1);
+                        }
+                        
+                        // Set WhatsApp with +27 country code and the cleaned number
                         setFormData(prev => ({ 
                           ...prev, 
-                          contactWhatsApp: prev.contactPhone 
+                          contactWhatsApp: `+27 ${phoneNumber}` 
                         }));
                       }
                     }}
@@ -443,7 +472,10 @@ export const NewPostPage: React.FC<NewPostPageProps> = ({ onCreatePost, onNaviga
                       contactWhatsApp: newValue
                     }));
                     // Disable sync if user manually changes WhatsApp number
-                    if (newValue !== formData.contactPhone) {
+                    // Compare just the number part (without country code)
+                    const phoneNumberOnly = formData.contactPhone.replace(/^(\+27|27|0)/, '').trim();
+                    const whatsappNumberOnly = e.target.value.trim();
+                    if (whatsappNumberOnly !== phoneNumberOnly) {
                       setSyncWhatsApp(false);
                     }
                   }}
