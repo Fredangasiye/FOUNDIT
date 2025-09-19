@@ -83,6 +83,11 @@ export const uploadImage = async (
     };
   } catch (error: any) {
     console.error('Image upload error:', error);
+    console.error('Error details:', {
+      code: error.code,
+      message: error.message,
+      stack: error.stack
+    });
     
     // Return fallback result instead of throwing
     return {
