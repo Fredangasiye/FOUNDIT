@@ -106,4 +106,44 @@ export const getPostsByUser = async (userPhone: string): Promise<Post[]> => {
     id: doc.id,
     datePosted: doc.data().datePosted?.toDate() || new Date()
   })) as Post[];
+};
+
+// Post operations for public use
+export const createPost = async (post: Post): Promise<void> => {
+  const postsRef = collection(db, 'posts');
+  await addDoc(postsRef, {
+    ...post,
+    datePosted: serverTimestamp()
+  });
+};
+
+export const getPosts = async (): Promise<Post[]> => {
+  const postsRef = collection(db, 'posts');
+  const q = query(postsRef, orderBy('datePosted', 'desc'));
+  const querySnapshot = await getDocs(q);
+  return querySnapshot.docs.map(doc => ({
+    ...doc.data(),
+    id: doc.id,
+    datePosted: doc.data().datePosted?.toDate() || new Date()
+  })) as Post[];
+};
+
+export const getPostsByCategory = async (category: string): Promise<Post[]> => {
+  const postsRef = collection(db, 'posts');
+  const q = query(
+    postsRef,
+    where('category', '==', category),
+    orderBy('datePosted', 'desc')
+  );
+  const querySnapshot = await getDocs(q);
+  return querySnapshot.docs.map(doc => ({
+    ...doc.data(),
+    id: doc.id,
+    datePosted: doc.data().datePosted?.toDate() || new Date()
+  })) as Post[];
+};
+
+export const deletePost = async (postId: string): Promise<void> => {
+  const postRef = doc(db, 'posts', postId);
+  await updateDoc(postRef, { deleted: true });
 }; 
