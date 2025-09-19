@@ -2,6 +2,7 @@ import { initializeApp } from 'firebase/app';
 import { getAuth, GoogleAuthProvider, onAuthStateChanged, User as FirebaseUser } from 'firebase/auth';
 import { getFirestore } from 'firebase/firestore';
 import { getStorage } from 'firebase/storage';
+import { getAnalytics } from 'firebase/analytics';
 
 const firebaseConfig = {
   apiKey: import.meta.env.VITE_FIREBASE_API_KEY || "demo-api-key",
@@ -9,7 +10,8 @@ const firebaseConfig = {
   projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID || "complex-connect-demo",
   storageBucket: import.meta.env.VITE_FIREBASE_STORAGE_BUCKET || "complex-connect-demo.appspot.com",
   messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID || "123456789",
-  appId: import.meta.env.VITE_FIREBASE_APP_ID || "1:123456789:web:abcdef123456"
+  appId: import.meta.env.VITE_FIREBASE_APP_ID || "1:123456789:web:abcdef123456",
+  measurementId: import.meta.env.VITE_FIREBASE_MEASUREMENT_ID || "demo-measurement-id"
 };
 
 // Validate Firebase configuration in production
@@ -20,7 +22,8 @@ if (import.meta.env.PROD) {
     'VITE_FIREBASE_PROJECT_ID',
     'VITE_FIREBASE_STORAGE_BUCKET',
     'VITE_FIREBASE_MESSAGING_SENDER_ID',
-    'VITE_FIREBASE_APP_ID'
+    'VITE_FIREBASE_APP_ID',
+    'VITE_FIREBASE_MEASUREMENT_ID'
   ];
 
   const missingVars = requiredEnvVars.filter(varName => !import.meta.env[varName]);
@@ -35,6 +38,7 @@ const app = initializeApp(firebaseConfig);
 export const auth = getAuth(app);
 export const db = getFirestore(app);
 export const storage = getStorage(app);
+export const analytics = typeof window !== 'undefined' ? getAnalytics(app) : null;
 export const googleProvider = new GoogleAuthProvider();
 
 // Configure Google provider
