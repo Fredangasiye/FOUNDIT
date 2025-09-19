@@ -71,8 +71,20 @@ export const NewPostPage: React.FC<NewPostPageProps> = ({ onCreatePost, onNaviga
     }
 
     setLoading(true);
+    
+    // Prepare post data, only include price if it has a value
+    const postData = {
+      ...formData,
+      price: formData.price || undefined
+    };
+    
+    // Remove undefined price field if it's not set
+    if (postData.price === undefined) {
+      delete postData.price;
+    }
+    
     await new Promise(resolve => setTimeout(resolve, 500));
-    onCreatePost(formData);
+    onCreatePost(postData);
     setLoading(false);
   };
 
@@ -353,7 +365,11 @@ export const NewPostPage: React.FC<NewPostPageProps> = ({ onCreatePost, onNaviga
                 id="unitNumber"
                 type="text"
                 value={formData.unitNumber}
-                onChange={(e) => setFormData(prev => ({ ...prev, unitNumber: e.target.value }))}
+                onChange={(e) => {
+                  // Only allow numbers and letters (for unit numbers like 4B, 205, etc.)
+                  const value = e.target.value.replace(/[^a-zA-Z0-9]/g, '');
+                  setFormData(prev => ({ ...prev, unitNumber: value }));
+                }}
                 className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
                 placeholder="e.g., 4B, 205, etc."
                 required

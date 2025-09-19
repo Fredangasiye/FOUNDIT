@@ -62,8 +62,13 @@ export const getUserByEmail = async (email: string): Promise<User | null> => {
 
 // Post operations
 export const createPost = async (post: Post): Promise<string> => {
+  // Filter out undefined values to prevent Firestore errors
+  const cleanPost = Object.fromEntries(
+    Object.entries(post).filter(([_, value]) => value !== undefined)
+  );
+  
   const docRef = await addDoc(collection(db, 'posts'), {
-    ...post,
+    ...cleanPost,
     datePosted: serverTimestamp(),
     createdAt: serverTimestamp()
   });
