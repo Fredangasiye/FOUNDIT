@@ -128,20 +128,6 @@ export const getPosts = async (): Promise<Post[]> => {
   })) as Post[];
 };
 
-export const getPostsByCategory = async (category: string): Promise<Post[]> => {
-  const postsRef = collection(db, 'posts');
-  const q = query(
-    postsRef,
-    where('category', '==', category),
-    orderBy('datePosted', 'desc')
-  );
-  const querySnapshot = await getDocs(q);
-  return querySnapshot.docs.map(doc => ({
-    ...doc.data(),
-    id: doc.id,
-    datePosted: doc.data().datePosted?.toDate() || new Date()
-  })) as Post[];
-};
 
 export const deletePost = async (postId: string): Promise<void> => {
   const postRef = doc(db, 'posts', postId);
