@@ -81,7 +81,7 @@ function App() {
     case 'Home':
       return (
         <HomePage
-          posts={filteredPosts}
+          posts={posts}
           activeCategory={activeCategory}
           onCategoryChange={setActiveCategory}
           onNavigate={navigate}

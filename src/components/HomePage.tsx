@@ -58,6 +58,9 @@ export const HomePage: React.FC<HomePageProps> = ({
     return posts.filter(post => post.category === category).length;
   };
 
+  // Filter posts for display based on active category
+  const filteredPosts = posts.filter(post => post.category === activeCategory);
+
   const handleShare = async () => {
     const shareData = {
       title: 'FOUNDIT',
@@ -83,8 +86,15 @@ export const HomePage: React.FC<HomePageProps> = ({
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Header Image */}
-      <div className="relative h-48 bg-gradient-to-r from-blue-600 via-purple-600 to-teal-600 overflow-hidden">
-        <div className="absolute inset-0 bg-black bg-opacity-20"></div>
+      <div className="relative h-48 overflow-hidden">
+        {/* Background Image */}
+        <img 
+          src="/header-image-01.jpg" 
+          alt="Community Header" 
+          className="w-full h-full object-cover"
+        />
+        {/* Overlay */}
+        <div className="absolute inset-0 bg-black bg-opacity-40"></div>
         <div className="absolute inset-0 bg-gradient-to-br from-transparent via-white/10 to-transparent"></div>
         <div className="relative h-full flex items-center justify-center">
           <div className="text-center text-white">
@@ -149,15 +159,23 @@ export const HomePage: React.FC<HomePageProps> = ({
               <button
                 key={category.name}
                 onClick={() => onCategoryChange(category.name as 'Lost' | 'Found' | 'For Sale/Services')}
-                className={`relative p-4 rounded-lg border-2 transition-all duration-200 ${
+                className={`relative p-4 rounded-lg border-2 transition-all duration-200 transform ${
                   activeCategory === category.name
-                    ? `${category.activeColor} border-transparent`
-                    : `${category.color} hover:shadow-md`
+                    ? `${category.activeColor} border-transparent shadow-lg scale-105 ring-2 ring-blue-500 ring-opacity-50`
+                    : `${category.color} hover:shadow-md hover:scale-102`
                 }`}
               >
                 <div className="text-center">
-                  <div className="font-semibold text-lg">{category.name}</div>
-                  <div className="text-sm opacity-75">{getCategoryCount(category.name as 'Lost' | 'Found' | 'For Sale/Services')} posts</div>
+                  <div className={`font-semibold text-lg ${
+                    activeCategory === category.name ? 'text-white' : ''
+                  }`}>
+                    {category.name}
+                  </div>
+                  <div className={`text-sm ${
+                    activeCategory === category.name ? 'text-white opacity-90' : 'opacity-75'
+                  }`}>
+                    {getCategoryCount(category.name as 'Lost' | 'Found' | 'For Sale/Services')} posts
+                  </div>
                 </div>
               </button>
             ))}
@@ -184,7 +202,7 @@ export const HomePage: React.FC<HomePageProps> = ({
             <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
             <p className="text-gray-600">Loading posts...</p>
           </div>
-        ) : posts.length === 0 ? (
+        ) : filteredPosts.length === 0 ? (
           <div className="text-center py-12">
             <MessageCircle className="w-16 h-16 text-gray-300 mx-auto mb-4" />
             <h3 className="text-lg font-semibold text-gray-900 mb-2">No posts yet</h3>
@@ -198,7 +216,7 @@ export const HomePage: React.FC<HomePageProps> = ({
           </div>
         ) : (
           <div className="space-y-4">
-            {posts.map((post) => (
+            {filteredPosts.map((post) => (
               <div key={post.id} className="relative">
                 <PostCard post={post} />
                 {isAdmin && (

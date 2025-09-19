@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { ArrowLeft, Upload, X, Send, Globe, Share2 } from 'lucide-react';
-import { uploadImage } from '../services/storageServiceDemo';
+import { uploadImage, validateImageFile } from '../services/imageService';
 
 interface NewPostPageProps {
   onCreatePost: (postData: {
@@ -38,10 +38,18 @@ export const NewPostPage: React.FC<NewPostPageProps> = ({ onCreatePost, onNaviga
     unitNumber: ''
   });
   const [loading, setLoading] = useState(false);
+  const [syncWhatsApp, setSyncWhatsApp] = useState(false);
+
+  // Auto-sync WhatsApp number when phone number changes and sync is enabled
+  React.useEffect(() => {
+    if (syncWhatsApp && formData.contactPhone) {
+      setFormData(prev => ({ ...prev, contactWhatsApp: formData.contactPhone }));
+    }
+  }, [formData.contactPhone, syncWhatsApp]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!formData.title || !formData.description || !formData.contactName || !formData.contactPhone || !formData.contactEmail || !formData.unitNumber) {
+    if (!formData.title || !formData.description || !formData.contactName || !formData.contactPhone || !formData.contactWhatsApp || !formData.contactEmail || !formData.unitNumber) {
       alert('Please fill in all required fields including contact information');
       return;
     }
@@ -56,22 +64,38 @@ export const NewPostPage: React.FC<NewPostPageProps> = ({ onCreatePost, onNaviga
     const file = e.target.files?.[0];
     if (!file) return;
 
+    // Validate file before upload
+    const validation = validateImageFile(file);
+    if (!validation.valid) {
+      alert(validation.error);
+      return;
+    }
+
     setLoading(true);
     try {
       // Generate a temporary user ID for upload (will be replaced with actual user ID in production)
       const tempUserId = 'temp_user_' + Date.now();
       const result = await uploadImage(file, tempUserId);
       
-      setFormData(prev => ({ 
-        ...prev, 
-        image: result.url,
-        imagePath: result.path
-      }));
-      
-      // Show success feedback
-      console.log('Image uploaded successfully:', result.url);
+      if (result.success) {
+        setFormData(prev => ({ 
+          ...prev, 
+          image: result.url,
+          imagePath: result.path
+        }));
+        console.log('Image uploaded successfully:', result.url);
+      } else {
+        // Still set the image (fallback) but show warning
+        setFormData(prev => ({ 
+          ...prev, 
+          image: result.url,
+          imagePath: result.path
+        }));
+        console.warn('Image upload failed, using fallback:', result.error);
+        alert('Image upload failed, but you can still create the post. The image will show a placeholder.');
+      }
     } catch (error) {
-      console.error("Image upload failed:", error);
+      console.error("Image upload error:", error);
       alert("Failed to upload image. Please try again.");
     } finally {
       setLoading(false);
@@ -135,13 +159,15 @@ export const NewPostPage: React.FC<NewPostPageProps> = ({ onCreatePost, onNaviga
                   key={category.value}
                   type="button"
                   onClick={() => setFormData(prev => ({ ...prev, category: category.value as 'Lost' | 'Found' | 'For Sale/Services' }))}
-                  className={`p-3 rounded-lg border-2 transition-all duration-200 ${
+                  className={`relative p-4 rounded-lg border-2 transition-all duration-200 transform ${
                     formData.category === category.value
-                      ? `${category.color} border-transparent`
-                      : `${category.color} hover:shadow-md`
+                      ? `${category.color} border-transparent shadow-lg scale-105 ring-2 ring-blue-500 ring-opacity-50`
+                      : `${category.color} hover:shadow-md hover:scale-102`
                   }`}
                 >
-                  {category.label}
+                  <div className="text-center font-semibold">
+                    {category.label}
+                  </div>
                 </button>
               ))}
             </div>
@@ -240,19 +266,26 @@ export const NewPostPage: React.FC<NewPostPageProps> = ({ onCreatePost, onNaviga
                   id="website"
                   type="url"
                   value={formData.website}
-                  onChange={(e) => setFormData(prev => ({ ...prev, website: e.target.value }))}
+                  onChange={(e) => {
+                    let value = e.target.value;
+                    // Auto-add https:// if user doesn't include a protocol
+                    if (value && !value.match(/^https?:\/\//)) {
+                      value = `https://${value}`;
+                    }
+                    setFormData(prev => ({ ...prev, website: value }));
+                  }}
                   className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
-                  placeholder="https://your-website.com"
+                  placeholder="your-website.com"
                 />
               </div>
             </div>
           )}
 
-          {/* Social Media (for For Sale/Services) */}
+          {/* Facebook Marketplace Link (for For Sale/Services) */}
           {formData.category === 'For Sale/Services' && (
             <div>
               <label htmlFor="socialMedia" className="block text-sm font-medium text-gray-700 mb-2">
-                Social Media Link
+                Facebook Marketplace Link (Optional)
               </label>
               <div className="relative">
                 <Share2 className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
@@ -260,9 +293,16 @@ export const NewPostPage: React.FC<NewPostPageProps> = ({ onCreatePost, onNaviga
                   id="socialMedia"
                   type="url"
                   value={formData.socialMedia}
-                  onChange={(e) => setFormData(prev => ({ ...prev, socialMedia: e.target.value }))}
+                  onChange={(e) => {
+                    let value = e.target.value;
+                    // Auto-add https:// if user doesn't include a protocol
+                    if (value && !value.match(/^https?:\/\//)) {
+                      value = `https://${value}`;
+                    }
+                    setFormData(prev => ({ ...prev, socialMedia: value }));
+                  }}
                   className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
-                  placeholder="https://instagram.com/your-profile"
+                  placeholder="facebook.com/marketplace/item/..."
                 />
               </div>
             </div>
@@ -323,16 +363,95 @@ export const NewPostPage: React.FC<NewPostPageProps> = ({ onCreatePost, onNaviga
             {/* WhatsApp */}
             <div className="mb-4">
               <label htmlFor="contactWhatsApp" className="block text-sm font-medium text-gray-700 mb-2">
-                WhatsApp Number
+                WhatsApp Number *
               </label>
-              <input
-                id="contactWhatsApp"
-                type="tel"
-                value={formData.contactWhatsApp}
-                onChange={(e) => setFormData(prev => ({ ...prev, contactWhatsApp: e.target.value }))}
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
-                placeholder="+1234567890 (optional)"
-              />
+              
+              {/* Auto-fill option */}
+              <div className="mb-3">
+                <label className="flex items-center">
+                  <input
+                    type="checkbox"
+                    checked={syncWhatsApp}
+                    onChange={(e) => {
+                      setSyncWhatsApp(e.target.checked);
+                      if (e.target.checked && formData.contactPhone) {
+                        setFormData(prev => ({ 
+                          ...prev, 
+                          contactWhatsApp: prev.contactPhone 
+                        }));
+                      }
+                    }}
+                    className="mr-2 h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                  />
+                  <span className="text-sm text-gray-600">
+                    Use same number as phone number
+                  </span>
+                </label>
+              </div>
+
+              <div className="flex">
+                <select
+                  value={formData.contactWhatsApp.split(' ')[0] || '+27'}
+                  onChange={(e) => {
+                    const currentNumber = formData.contactWhatsApp.split(' ').slice(1).join(' ');
+                    setFormData(prev => ({ 
+                      ...prev, 
+                      contactWhatsApp: `${e.target.value} ${currentNumber}`.trim()
+                    }));
+                  }}
+                  className="px-3 py-3 border border-gray-300 rounded-l-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 bg-gray-50 border-r-0"
+                >
+                  <option value="+27">🇿🇦 +27</option>
+                  <option value="+1">🇺🇸 +1</option>
+                  <option value="+44">🇬🇧 +44</option>
+                  <option value="+49">🇩🇪 +49</option>
+                  <option value="+33">🇫🇷 +33</option>
+                  <option value="+39">🇮🇹 +39</option>
+                  <option value="+34">🇪🇸 +34</option>
+                  <option value="+31">🇳🇱 +31</option>
+                  <option value="+32">🇧🇪 +32</option>
+                  <option value="+41">🇨🇭 +41</option>
+                  <option value="+43">🇦🇹 +43</option>
+                  <option value="+45">🇩🇰 +45</option>
+                  <option value="+46">🇸🇪 +46</option>
+                  <option value="+47">🇳🇴 +47</option>
+                  <option value="+358">🇫🇮 +358</option>
+                  <option value="+48">🇵🇱 +48</option>
+                  <option value="+420">🇨🇿 +420</option>
+                  <option value="+421">🇸🇰 +421</option>
+                  <option value="+36">🇭🇺 +36</option>
+                  <option value="+40">🇷🇴 +40</option>
+                  <option value="+359">🇧🇬 +359</option>
+                  <option value="+385">🇭🇷 +385</option>
+                  <option value="+386">🇸🇮 +386</option>
+                  <option value="+372">🇪🇪 +372</option>
+                  <option value="+371">🇱🇻 +371</option>
+                  <option value="+370">🇱🇹 +370</option>
+                  <option value="+7">🇷🇺 +7</option>
+                  <option value="+380">🇺🇦 +380</option>
+                  <option value="+375">🇧🇾 +375</option>
+                </select>
+                <input
+                  id="contactWhatsApp"
+                  type="tel"
+                  value={formData.contactWhatsApp.split(' ').slice(1).join(' ')}
+                  onChange={(e) => {
+                    const countryCode = formData.contactWhatsApp.split(' ')[0] || '+27';
+                    const newValue = `${countryCode} ${e.target.value}`.trim();
+                    setFormData(prev => ({ 
+                      ...prev, 
+                      contactWhatsApp: newValue
+                    }));
+                    // Disable sync if user manually changes WhatsApp number
+                    if (newValue !== formData.contactPhone) {
+                      setSyncWhatsApp(false);
+                    }
+                  }}
+                  className="flex-1 px-4 py-3 border border-gray-300 rounded-r-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
+                  placeholder="795778455"
+                  required
+                />
+              </div>
             </div>
 
             {/* Contact Email */}
