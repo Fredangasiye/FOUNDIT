@@ -72,15 +72,30 @@ export const NewPostPage: React.FC<NewPostPageProps> = ({ onCreatePost, onNaviga
 
     setLoading(true);
     
-    // Prepare post data, only include price if it has a value
-    const postData = {
-      ...formData,
-      price: formData.price || undefined
+    // Prepare post data, filtering out empty optional fields
+    const postData: any = {
+      title: formData.title,
+      description: formData.description,
+      category: formData.category,
+      contactName: formData.contactName,
+      contactPhone: formData.contactPhone,
+      contactWhatsApp: formData.contactWhatsApp,
+      unitNumber: formData.unitNumber,
+      image: formData.image
     };
-    
-    // Remove undefined price field if it's not set
-    if (postData.price === undefined) {
-      delete postData.price;
+
+    // Only include optional fields if they have values
+    if (formData.price && formData.price.trim() !== '') {
+      postData.price = parseFloat(formData.price);
+    }
+    if (formData.contactEmail && formData.contactEmail.trim() !== '') {
+      postData.contactEmail = formData.contactEmail;
+    }
+    if (formData.website && formData.website.trim() !== '') {
+      postData.website = formData.website;
+    }
+    if (formData.socialMedia && formData.socialMedia.trim() !== '') {
+      postData.socialMedia = formData.socialMedia;
     }
     
     await new Promise(resolve => setTimeout(resolve, 500));

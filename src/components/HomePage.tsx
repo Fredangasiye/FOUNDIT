@@ -163,20 +163,33 @@ export const HomePage: React.FC<HomePageProps> = ({
         imageUrl = await uploadImage(selectedFile, editingPost.id);
       }
 
-      const updatedData = {
+      // Prepare update data, filtering out undefined values
+      const updatedData: any = {
         title: editFormData.title,
         description: editFormData.description,
         category: editFormData.category as 'Lost' | 'Found' | 'For Sale/Services',
-        price: editFormData.price ? parseFloat(editFormData.price) : undefined,
         contactName: editFormData.contactName,
         contactPhone: editFormData.contactPhone,
-        contactEmail: editFormData.contactEmail,
-        contactWhatsApp: editFormData.contactWhatsApp || undefined,
         unitNumber: editFormData.unitNumber,
-        website: editFormData.website || undefined,
-        socialMedia: editFormData.socialMedia || undefined,
         image: imageUrl
       };
+
+      // Only include optional fields if they have values
+      if (editFormData.price && editFormData.price.trim() !== '') {
+        updatedData.price = parseFloat(editFormData.price);
+      }
+      if (editFormData.contactEmail && editFormData.contactEmail.trim() !== '') {
+        updatedData.contactEmail = editFormData.contactEmail;
+      }
+      if (editFormData.contactWhatsApp && editFormData.contactWhatsApp.trim() !== '') {
+        updatedData.contactWhatsApp = editFormData.contactWhatsApp;
+      }
+      if (editFormData.website && editFormData.website.trim() !== '') {
+        updatedData.website = editFormData.website;
+      }
+      if (editFormData.socialMedia && editFormData.socialMedia.trim() !== '') {
+        updatedData.socialMedia = editFormData.socialMedia;
+      }
 
       const success = await onEditPost(editingPost.id, updatedData);
       if (success) {
