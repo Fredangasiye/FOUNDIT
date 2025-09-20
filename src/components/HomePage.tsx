@@ -31,6 +31,21 @@ export const HomePage: React.FC<HomePageProps> = ({
   const [showAdminLogin, setShowAdminLogin] = useState(false);
   const [adminEmail, setAdminEmail] = useState('');
   const [adminPhone, setAdminPhone] = useState('');
+  const [showEditModal, setShowEditModal] = useState(false);
+  const [editingPost, setEditingPost] = useState<Post | null>(null);
+  const [editFormData, setEditFormData] = useState({
+    title: '',
+    description: '',
+    category: '',
+    price: '',
+    contactName: '',
+    contactPhone: '',
+    contactEmail: '',
+    contactWhatsApp: '',
+    unitNumber: '',
+    website: '',
+    socialMedia: ''
+  });
   const categories = [
     { name: 'Lost', color: 'bg-red-100 text-red-800 border-red-200', activeColor: 'bg-red-500 text-white' },
     { name: 'Found', color: 'bg-green-100 text-green-800 border-green-200', activeColor: 'bg-green-500 text-white' },
@@ -64,8 +79,69 @@ export const HomePage: React.FC<HomePageProps> = ({
   };
 
   const handleEditPost = (postId: string) => {
-    // For now, just show an alert. In a real app, you'd open an edit modal
-    alert('Edit functionality coming soon! Post ID: ' + postId);
+    const post = posts.find(p => p.id === postId);
+    if (post) {
+      setEditingPost(post);
+      setEditFormData({
+        title: post.title,
+        description: post.description,
+        category: post.category,
+        price: post.price ? post.price.toString() : '',
+        contactName: post.contactName,
+        contactPhone: post.contactPhone,
+        contactEmail: post.contactEmail,
+        contactWhatsApp: post.contactWhatsApp || '',
+        unitNumber: post.unitNumber,
+        website: post.website || '',
+        socialMedia: post.socialMedia || ''
+      });
+      setShowEditModal(true);
+    }
+  };
+
+  const handleEditSubmit = async () => {
+    if (!editingPost || !onEditPost) return;
+
+    const updatedData = {
+      title: editFormData.title,
+      description: editFormData.description,
+      category: editFormData.category,
+      price: editFormData.price ? parseFloat(editFormData.price) : undefined,
+      contactName: editFormData.contactName,
+      contactPhone: editFormData.contactPhone,
+      contactEmail: editFormData.contactEmail,
+      contactWhatsApp: editFormData.contactWhatsApp || undefined,
+      unitNumber: editFormData.unitNumber,
+      website: editFormData.website || undefined,
+      socialMedia: editFormData.socialMedia || undefined
+    };
+
+    const success = await onEditPost(editingPost.id, updatedData);
+    if (success) {
+      setShowEditModal(false);
+      setEditingPost(null);
+      alert('Post updated successfully!');
+    } else {
+      alert('Failed to update post');
+    }
+  };
+
+  const handleEditCancel = () => {
+    setShowEditModal(false);
+    setEditingPost(null);
+    setEditFormData({
+      title: '',
+      description: '',
+      category: '',
+      price: '',
+      contactName: '',
+      contactPhone: '',
+      contactEmail: '',
+      contactWhatsApp: '',
+      unitNumber: '',
+      website: '',
+      socialMedia: ''
+    });
   };
 
   const getCategoryCount = (category: 'Lost' | 'Found' | 'For Sale/Services') => {
@@ -130,8 +206,6 @@ export const HomePage: React.FC<HomePageProps> = ({
               <p className="text-gray-600">Community Posts</p>
             </div>
             <div className="flex items-center gap-3">
-              {/* Debug: Show admin state */}
-              <span className="text-xs text-gray-500">Admin: {isAdmin ? 'Yes' : 'No'}</span>
               {isAdmin ? (
                 <>
                   <span className="text-sm text-green-600 font-medium flex items-center gap-1">
@@ -306,6 +380,186 @@ export const HomePage: React.FC<HomePageProps> = ({
                 className="flex-1 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors duration-200"
               >
                 Login
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Edit Post Modal */}
+      {showEditModal && editingPost && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg p-6 w-full max-w-2xl mx-4 max-h-[90vh] overflow-y-auto">
+            <h3 className="text-lg font-semibold text-gray-900 mb-4">Edit Post</h3>
+            <div className="space-y-4">
+              {/* Title */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Title *
+                </label>
+                <input
+                  type="text"
+                  value={editFormData.title}
+                  onChange={(e) => setEditFormData({...editFormData, title: e.target.value})}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  placeholder="Enter post title"
+                />
+              </div>
+
+              {/* Description */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Description *
+                </label>
+                <textarea
+                  value={editFormData.description}
+                  onChange={(e) => setEditFormData({...editFormData, description: e.target.value})}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  rows={3}
+                  placeholder="Enter description"
+                />
+              </div>
+
+              {/* Category */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Category *
+                </label>
+                <select
+                  value={editFormData.category}
+                  onChange={(e) => setEditFormData({...editFormData, category: e.target.value})}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                >
+                  <option value="">Select category</option>
+                  <option value="Lost">Lost</option>
+                  <option value="Found">Found</option>
+                  <option value="For Sale/Services">For Sale/Services</option>
+                </select>
+              </div>
+
+              {/* Price (only for For Sale/Services) */}
+              {editFormData.category === 'For Sale/Services' && (
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Price (R)
+                  </label>
+                  <input
+                    type="number"
+                    step="0.01"
+                    value={editFormData.price}
+                    onChange={(e) => setEditFormData({...editFormData, price: e.target.value})}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    placeholder="0.00"
+                  />
+                </div>
+              )}
+
+              {/* Contact Information */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Contact Name *
+                  </label>
+                  <input
+                    type="text"
+                    value={editFormData.contactName}
+                    onChange={(e) => setEditFormData({...editFormData, contactName: e.target.value})}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    placeholder="Your name"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Unit Number *
+                  </label>
+                  <input
+                    type="text"
+                    value={editFormData.unitNumber}
+                    onChange={(e) => setEditFormData({...editFormData, unitNumber: e.target.value})}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    placeholder="Unit number"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Phone *
+                  </label>
+                  <input
+                    type="tel"
+                    value={editFormData.contactPhone}
+                    onChange={(e) => setEditFormData({...editFormData, contactPhone: e.target.value})}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    placeholder="Phone number"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Email *
+                  </label>
+                  <input
+                    type="email"
+                    value={editFormData.contactEmail}
+                    onChange={(e) => setEditFormData({...editFormData, contactEmail: e.target.value})}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    placeholder="Email address"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    WhatsApp
+                  </label>
+                  <input
+                    type="tel"
+                    value={editFormData.contactWhatsApp}
+                    onChange={(e) => setEditFormData({...editFormData, contactWhatsApp: e.target.value})}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    placeholder="WhatsApp number"
+                  />
+                </div>
+              </div>
+
+              {/* Website and Social Media (only for For Sale/Services) */}
+              {editFormData.category === 'For Sale/Services' && (
+                <>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Website
+                    </label>
+                    <input
+                      type="url"
+                      value={editFormData.website}
+                      onChange={(e) => setEditFormData({...editFormData, website: e.target.value})}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                      placeholder="https://example.com"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Social Media
+                    </label>
+                    <input
+                      type="url"
+                      value={editFormData.socialMedia}
+                      onChange={(e) => setEditFormData({...editFormData, socialMedia: e.target.value})}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                      placeholder="https://facebook.com/yourpage"
+                    />
+                  </div>
+                </>
+              )}
+            </div>
+            <div className="flex gap-3 mt-6">
+              <button
+                onClick={handleEditCancel}
+                className="flex-1 px-4 py-2 text-gray-600 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors duration-200"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleEditSubmit}
+                className="flex-1 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors duration-200"
+              >
+                Update Post
               </button>
             </div>
           </div>
