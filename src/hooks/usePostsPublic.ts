@@ -55,11 +55,11 @@ export const usePosts = () => {
   const addExamplePostsIfNeeded = async () => {
     // Only add examples if there are no posts
     if (posts.length === 0) {
-      const examplePosts = [
+      const examplePosts: Omit<Post, 'id' | 'datePosted'>[] = [
         {
           title: "Lost: Black iPhone 13 Pro",
           description: "I lost my black iPhone 13 Pro yesterday evening around 7 PM. It has a clear case with a photo of my family inside. The phone was last seen near the main entrance. It's very important to me as it contains precious family photos. Please contact me if found!",
-          category: "Lost",
+          category: "Lost" as const,
           contactName: "Sarah Johnson",
           contactPhone: "0821234567",
           contactEmail: "sarah.johnson@email.com",
@@ -71,7 +71,7 @@ export const usePosts = () => {
         {
           title: "Found: Blue Backpack with Laptop",
           description: "Found a blue backpack containing a Dell laptop near the parking area this morning. The backpack also has some books and a water bottle. I've kept it safe and would like to return it to the rightful owner. Please describe the contents to claim it.",
-          category: "Found",
+          category: "Found" as const,
           contactName: "Mike Chen",
           contactPhone: "0834567890",
           contactEmail: "mike.chen@email.com",
@@ -83,7 +83,7 @@ export const usePosts = () => {
         {
           title: "Professional Photography Services",
           description: "Offering professional photography services for events, portraits, and real estate. 10+ years experience with high-quality equipment. Specializing in family portraits, corporate events, and property photography. Competitive rates and flexible scheduling available.",
-          category: "For Sale/Services",
+          category: "For Sale/Services" as const,
           price: 500,
           contactName: "David Wilson",
           contactPhone: "0845678901",
@@ -98,7 +98,7 @@ export const usePosts = () => {
         {
           title: "Lost: Golden Retriever - Max",
           description: "Our beloved golden retriever Max went missing yesterday afternoon. He's 3 years old, very friendly, and wearing a blue collar with our contact info. Last seen near the playground area. He responds to his name and loves treats. Please help us find him!",
-          category: "Lost",
+          category: "Lost" as const,
           contactName: "Emma Thompson",
           contactPhone: "0856789012",
           contactEmail: "emma.thompson@email.com",
@@ -110,7 +110,7 @@ export const usePosts = () => {
         {
           title: "Found: Set of Car Keys",
           description: "Found a set of car keys with a small keychain near the mailboxes. The keys appear to be for a Toyota vehicle. I've left them with the building security. Please contact me to describe the keychain to claim them.",
-          category: "Found",
+          category: "Found" as const,
           contactName: "Lisa Park",
           contactPhone: "0867890123",
           contactEmail: "lisa.park@email.com",
@@ -122,7 +122,7 @@ export const usePosts = () => {
         {
           title: "Home Tutoring - Mathematics & Science",
           description: "Experienced tutor offering mathematics and science tutoring for high school students. Bachelor's degree in Engineering with 5+ years teaching experience. Available evenings and weekends. Can help with exam preparation and homework assistance.",
-          category: "For Sale/Services",
+          category: "For Sale/Services" as const,
           price: 200,
           contactName: "Dr. James Miller",
           contactPhone: "0878901234",
