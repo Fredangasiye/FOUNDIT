@@ -47,12 +47,17 @@ export const PostCard: React.FC<PostCardProps> = ({ post }) => {
     <div className="bg-white rounded-xl shadow-md hover:shadow-lg transition-shadow duration-200 overflow-hidden">
       {/* Image */}
       {post.image && (
-        <div className="h-48 bg-gray-200 overflow-hidden">
+        <div className="h-48 bg-gray-200 overflow-hidden relative">
           <img
             src={post.image}
             alt={post.title}
             className="w-full h-full object-cover hover:scale-105 transition-transform duration-300"
           />
+          {post.isAdminPost && (
+            <div className="absolute top-2 right-2 bg-yellow-400 text-yellow-900 px-2 py-1 rounded text-xs font-semibold shadow-lg">
+              EXAMPLE
+            </div>
+          )}
         </div>
       )}
 

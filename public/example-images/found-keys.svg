@@ -1,0 +1,11 @@
+<svg width="400" height="300" viewBox="0 0 400 300" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect width="400" height="300" fill="#F3F4F6"/>
+  <circle cx="200" cy="150" r="30" fill="#F59E0B"/>
+  <rect x="185" y="120" width="30" height="60" rx="5" fill="#D97706"/>
+  <rect x="190" y="125" width="20" height="50" rx="3" fill="#F59E0B"/>
+  <rect x="195" y="130" width="10" height="40" rx="2" fill="#FBBF24"/>
+  <rect x="200" y="180" width="40" height="20" rx="3" fill="#6B7280"/>
+  <rect x="205" y="185" width="30" height="10" rx="2" fill="#9CA3AF"/>
+  <text x="200" y="250" font-family="Arial, sans-serif" font-size="14" fill="#666666" text-anchor="middle">EXAMPLE - LIVING TERRACE</text>
+  <text x="200" y="265" font-family="Arial, sans-serif" font-size="12" fill="#999999" text-anchor="middle">Found Car Keys</text>
+</svg>
