@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
-import { Plus, User, Share2, MessageCircle, Shield, LogOut, LogIn } from 'lucide-react';
+import { Plus, User, Share2, MessageCircle, Shield, LogOut, LogIn, Upload, X } from 'lucide-react';
 import { Post } from '../types';
 import { PostCard } from './PostCard';
+import { uploadImage } from '../services/firestoreService';
 
 interface HomePageProps {
   posts: Post[];
@@ -58,6 +59,9 @@ export const HomePage: React.FC<HomePageProps> = ({
     image: ''
   });
   const [bulkMode, setBulkMode] = useState(false);
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [imagePreview, setImagePreview] = useState<string | null>(null);
+  const [isUploading, setIsUploading] = useState(false);
   const categories = [
     { name: 'Lost', color: 'bg-red-100 text-red-800 border-red-200', activeColor: 'bg-red-500 text-white' },
     { name: 'Found', color: 'bg-green-100 text-green-800 border-green-200', activeColor: 'bg-green-500 text-white' },
@@ -106,41 +110,98 @@ export const HomePage: React.FC<HomePageProps> = ({
         socialMedia: post.socialMedia || '',
         image: post.image || ''
       });
+      setSelectedFile(null);
+      setImagePreview(null);
       setShowEditModal(true);
     }
+  };
+
+  const handleFileSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (file) {
+      // Validate file type
+      if (!file.type.startsWith('image/')) {
+        alert('Please select an image file');
+        return;
+      }
+      
+      // Validate file size (max 5MB)
+      if (file.size > 5 * 1024 * 1024) {
+        alert('Image size must be less than 5MB');
+        return;
+      }
+      
+      setSelectedFile(file);
+      
+      // Create preview
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        setImagePreview(e.target?.result as string);
+      };
+      reader.readAsDataURL(file);
+      
+      // Clear URL input when file is selected
+      setEditFormData({...editFormData, image: ''});
+    }
+  };
+
+  const handleRemoveFile = () => {
+    setSelectedFile(null);
+    setImagePreview(null);
   };
 
   const handleEditSubmit = async () => {
     if (!editingPost || !onEditPost) return;
 
-    const updatedData = {
-      title: editFormData.title,
-      description: editFormData.description,
-      category: editFormData.category as 'Lost' | 'Found' | 'For Sale/Services',
-      price: editFormData.price ? parseFloat(editFormData.price) : undefined,
-      contactName: editFormData.contactName,
-      contactPhone: editFormData.contactPhone,
-      contactEmail: editFormData.contactEmail,
-      contactWhatsApp: editFormData.contactWhatsApp || undefined,
-      unitNumber: editFormData.unitNumber,
-      website: editFormData.website || undefined,
-      socialMedia: editFormData.socialMedia || undefined,
-      image: editFormData.image
-    };
+    setIsUploading(true);
+    
+    try {
+      let imageUrl = editFormData.image;
+      
+      // Upload file if selected
+      if (selectedFile) {
+        imageUrl = await uploadImage(selectedFile, editingPost.id);
+      }
 
-    const success = await onEditPost(editingPost.id, updatedData);
-    if (success) {
-      setShowEditModal(false);
-      setEditingPost(null);
-      alert('Post updated successfully!');
-    } else {
-      alert('Failed to update post');
+      const updatedData = {
+        title: editFormData.title,
+        description: editFormData.description,
+        category: editFormData.category as 'Lost' | 'Found' | 'For Sale/Services',
+        price: editFormData.price ? parseFloat(editFormData.price) : undefined,
+        contactName: editFormData.contactName,
+        contactPhone: editFormData.contactPhone,
+        contactEmail: editFormData.contactEmail,
+        contactWhatsApp: editFormData.contactWhatsApp || undefined,
+        unitNumber: editFormData.unitNumber,
+        website: editFormData.website || undefined,
+        socialMedia: editFormData.socialMedia || undefined,
+        image: imageUrl
+      };
+
+      const success = await onEditPost(editingPost.id, updatedData);
+      if (success) {
+        setShowEditModal(false);
+        setEditingPost(null);
+        setSelectedFile(null);
+        setImagePreview(null);
+        alert('Post updated successfully!');
+      } else {
+        alert('Failed to update post');
+      }
+    } catch (error) {
+      console.error('Error updating post:', error);
+      alert('Failed to upload image or update post');
+    } finally {
+      setIsUploading(false);
     }
   };
 
   const handleEditCancel = () => {
     setShowEditModal(false);
     setEditingPost(null);
+    setSelectedFile(null);
+    setImagePreview(null);
+    setIsUploading(false);
     setEditFormData({
       title: '',
       description: '',
@@ -533,19 +594,69 @@ export const HomePage: React.FC<HomePageProps> = ({
               {/* Image */}
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Image URL
+                  Image
                 </label>
-                <input
-                  type="url"
-                  value={editFormData.image}
-                  onChange={(e) => setEditFormData({...editFormData, image: e.target.value})}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  placeholder="https://example.com/image.jpg"
-                />
-                {editFormData.image && (
+                
+                {/* File Upload */}
+                <div className="mb-4">
+                  <label className="flex flex-col items-center justify-center w-full h-32 border-2 border-gray-300 border-dashed rounded-lg cursor-pointer bg-gray-50 hover:bg-gray-100 transition-colors duration-200">
+                    <div className="flex flex-col items-center justify-center pt-5 pb-6">
+                      <Upload className="w-8 h-8 mb-2 text-gray-400" />
+                      <p className="mb-2 text-sm text-gray-500">
+                        <span className="font-semibold">Click to upload</span> an image
+                      </p>
+                      <p className="text-xs text-gray-500">PNG, JPG, GIF up to 5MB</p>
+                    </div>
+                    <input
+                      type="file"
+                      accept="image/*"
+                      onChange={handleFileSelect}
+                      className="hidden"
+                    />
+                  </label>
+                  
+                  {selectedFile && (
+                    <div className="mt-2 flex items-center gap-2">
+                      <span className="text-sm text-gray-600 truncate flex-1">
+                        {selectedFile.name}
+                      </span>
+                      <button
+                        type="button"
+                        onClick={handleRemoveFile}
+                        className="p-1 text-red-500 hover:text-red-700"
+                      >
+                        <X className="w-4 h-4" />
+                      </button>
+                    </div>
+                  )}
+                </div>
+
+                {/* Image URL Input (Alternative) */}
+                <div className="mb-4">
+                  <label className="block text-xs font-medium text-gray-500 mb-1">
+                    Or paste image URL:
+                  </label>
+                  <input
+                    type="url"
+                    value={editFormData.image}
+                    onChange={(e) => {
+                      setEditFormData({...editFormData, image: e.target.value});
+                      if (e.target.value) {
+                        setSelectedFile(null);
+                        setImagePreview(null);
+                      }
+                    }}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
+                    placeholder="https://example.com/image.jpg"
+                    disabled={!!selectedFile}
+                  />
+                </div>
+
+                {/* Image Preview */}
+                {(imagePreview || editFormData.image) && (
                   <div className="mt-2">
                     <img 
-                      src={editFormData.image} 
+                      src={imagePreview || editFormData.image} 
                       alt="Preview" 
                       className="w-full h-32 object-cover rounded-lg border border-gray-200"
                       onError={(e) => {
@@ -693,9 +804,21 @@ export const HomePage: React.FC<HomePageProps> = ({
               </button>
               <button
                 onClick={handleEditSubmit}
-                className="flex-1 px-4 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors duration-200 text-sm sm:text-base font-medium"
+                disabled={isUploading}
+                className={`flex-1 px-4 py-3 rounded-lg transition-colors duration-200 text-sm sm:text-base font-medium flex items-center justify-center gap-2 ${
+                  isUploading 
+                    ? 'bg-gray-400 text-gray-200 cursor-not-allowed' 
+                    : 'bg-blue-600 text-white hover:bg-blue-700'
+                }`}
               >
-                Update Post
+                {isUploading ? (
+                  <>
+                    <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                    Uploading...
+                  </>
+                ) : (
+                  'Update Post'
+                )}
               </button>
             </div>
           </div>

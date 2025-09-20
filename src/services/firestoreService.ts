@@ -12,7 +12,13 @@ import {
   serverTimestamp,
   deleteDoc
 } from 'firebase/firestore';
-import { db } from '../config/firebase';
+import { 
+  ref, 
+  uploadBytes, 
+  getDownloadURL, 
+  deleteObject 
+} from 'firebase/storage';
+import { db, storage } from '../config/firebase';
 import { User, Post, CreatePostData } from '../types';
 
 // User operations
@@ -122,6 +128,24 @@ export const updatePost = async (postId: string, postData: Partial<Post>): Promi
     ...postData,
     updatedAt: serverTimestamp()
   });
+};
+
+// Image upload functions
+export const uploadImage = async (file: File, postId: string): Promise<string> => {
+  const imageRef = ref(storage, `post-images/${postId}/${file.name}`);
+  const snapshot = await uploadBytes(imageRef, file);
+  const downloadURL = await getDownloadURL(snapshot.ref);
+  return downloadURL;
+};
+
+export const deleteImage = async (imageUrl: string): Promise<void> => {
+  try {
+    const imageRef = ref(storage, imageUrl);
+    await deleteObject(imageRef);
+  } catch (error) {
+    console.error('Error deleting image:', error);
+    // Don't throw error for image deletion failures
+  }
 };
 
 export const deletePost = async (postId: string): Promise<void> => {
