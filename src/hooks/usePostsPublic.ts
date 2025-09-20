@@ -115,7 +115,7 @@ export const usePosts = () => {
           image: "/example-images/photography-service.svg",
           website: "https://davidwilsonphotography.com",
           socialMedia: "https://instagram.com/davidwilsonphoto",
-          isAdminPost: true
+          isAdminPost: false
         },
         {
           title: "Lost: Golden Retriever - Max",
