@@ -86,8 +86,8 @@ export const NewPostPage: React.FC<NewPostPageProps> = ({ onCreatePost, onNaviga
     };
 
     // Only include optional fields if they have values
-    if (formData.price && formData.price.trim() !== '') {
-      postData.price = parseFloat(formData.price);
+    if (formData.price && formData.price > 0) {
+      postData.price = formData.price;
     }
     if (formData.contactEmail && formData.contactEmail.trim() !== '') {
       postData.contactEmail = formData.contactEmail;

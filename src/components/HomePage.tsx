@@ -197,7 +197,10 @@ export const HomePage: React.FC<HomePageProps> = ({
 
       // Only include optional fields if they have values
       if (editFormData.price && editFormData.price.trim() !== '') {
-        updatedData.price = parseFloat(editFormData.price);
+        const priceValue = parseFloat(editFormData.price);
+        if (!isNaN(priceValue) && priceValue > 0) {
+          updatedData.price = priceValue;
+        }
       }
       if (editFormData.contactEmail && editFormData.contactEmail.trim() !== '') {
         updatedData.contactEmail = editFormData.contactEmail;
