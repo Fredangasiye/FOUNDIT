@@ -28,7 +28,6 @@ export const HomePage: React.FC<HomePageProps> = ({
   onDeletePost,
   onEditPost
 }) => {
-  console.log('HomePage rendered with isAdmin:', isAdmin);
   const [showAdminLogin, setShowAdminLogin] = useState(false);
   const [adminEmail, setAdminEmail] = useState('');
   const [adminPhone, setAdminPhone] = useState('');
@@ -131,6 +130,8 @@ export const HomePage: React.FC<HomePageProps> = ({
               <p className="text-gray-600">Community Posts</p>
             </div>
             <div className="flex items-center gap-3">
+              {/* Debug: Show admin state */}
+              <span className="text-xs text-gray-500">Admin: {isAdmin ? 'Yes' : 'No'}</span>
               {isAdmin ? (
                 <>
                   <span className="text-sm text-green-600 font-medium flex items-center gap-1">

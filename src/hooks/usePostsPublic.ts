@@ -17,9 +17,7 @@ export const usePosts = () => {
     const checkAdmin = () => {
       const adminEmail = localStorage.getItem('foundit_admin_email');
       const adminPhone = localStorage.getItem('foundit_admin_phone');
-      const isAdminUser = adminEmail === ADMIN_EMAIL && adminPhone === ADMIN_PHONE;
-      console.log('Checking admin status:', { adminEmail, adminPhone, ADMIN_EMAIL, ADMIN_PHONE, isAdminUser });
-      return isAdminUser;
+      return adminEmail === ADMIN_EMAIL && adminPhone === ADMIN_PHONE;
     };
     setIsAdmin(checkAdmin());
   }, []);
@@ -138,15 +136,12 @@ export const usePosts = () => {
   };
 
   const handleAdminLogin = (email: string, phone: string) => {
-    console.log('Admin login attempt:', { email, phone, ADMIN_EMAIL, ADMIN_PHONE });
     if (email === ADMIN_EMAIL && phone === ADMIN_PHONE) {
       localStorage.setItem('foundit_admin_email', email);
       localStorage.setItem('foundit_admin_phone', phone);
       setIsAdmin(true);
-      console.log('Admin login successful, isAdmin set to true');
       return true;
     }
-    console.log('Admin login failed - credentials mismatch');
     return false;
   };
 
