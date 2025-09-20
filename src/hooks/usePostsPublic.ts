@@ -4,7 +4,7 @@ import { Post } from '../types';
 
 // Admin configuration - change this to your details
 const ADMIN_EMAIL = 'fred@foundit.com'; // Change this to your email
-const ADMIN_PHONE = '+27795778455'; // Change this to your phone
+const ADMIN_PHONE = '0795774877'; // Change this to your phone
 
 export const usePosts = () => {
   const [posts, setPosts] = useState<Post[]>([]);
