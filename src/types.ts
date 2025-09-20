@@ -24,7 +24,7 @@ export interface Post {
   contactName: string;
   contactPhone: string;
   contactWhatsApp: string;
-  contactEmail: string;
+  contactEmail?: string; // Optional email field
   unitNumber: string;
   // Admin fields
   isAdminPost?: boolean;

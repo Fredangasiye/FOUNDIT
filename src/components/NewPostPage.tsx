@@ -65,7 +65,7 @@ export const NewPostPage: React.FC<NewPostPageProps> = ({ onCreatePost, onNaviga
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!formData.title || !formData.description || !formData.contactName || !formData.contactPhone || !formData.contactWhatsApp || !formData.contactEmail || !formData.unitNumber) {
+    if (!formData.title || !formData.description || !formData.contactName || !formData.contactPhone || !formData.contactWhatsApp || !formData.unitNumber) {
       alert('Please fill in all required fields including contact information');
       return;
     }
@@ -505,7 +505,7 @@ export const NewPostPage: React.FC<NewPostPageProps> = ({ onCreatePost, onNaviga
             {/* Contact Email */}
             <div className="mb-4">
               <label htmlFor="contactEmail" className="block text-sm font-medium text-gray-700 mb-2">
-                Email Address *
+                Email Address
               </label>
               <input
                 id="contactEmail"
@@ -513,8 +513,7 @@ export const NewPostPage: React.FC<NewPostPageProps> = ({ onCreatePost, onNaviga
                 value={formData.contactEmail}
                 onChange={(e) => setFormData(prev => ({ ...prev, contactEmail: e.target.value }))}
                 className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
-                placeholder="your.email@example.com"
-                required
+                placeholder="your.email@example.com (optional)"
               />
             </div>
           </div>

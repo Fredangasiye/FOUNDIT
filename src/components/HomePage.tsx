@@ -741,14 +741,14 @@ export const HomePage: React.FC<HomePageProps> = ({
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Email *
+                    Email
                   </label>
                   <input
                     type="email"
                     value={editFormData.contactEmail}
                     onChange={(e) => setEditFormData({...editFormData, contactEmail: e.target.value})}
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                    placeholder="Email address"
+                    placeholder="Email address (optional)"
                   />
                 </div>
                 <div>
