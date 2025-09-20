@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { Plus, User, Share2, MessageCircle, Shield, LogOut, LogIn, Upload, X } from 'lucide-react';
 import { Post } from '../types';
 import { PostCard } from './PostCard';
-// import { trackCategorySwitch, trackPageView } from '../utils/analytics';
+import { trackCategorySwitch, trackPageView } from '../utils/analytics';
 import { uploadImage } from '../services/firestoreService';
 
 interface HomePageProps {
@@ -40,8 +40,22 @@ export const HomePage: React.FC<HomePageProps> = ({
   onClearSelection,
   onBulkDeletePosts
 }) => {
-  // Wrapper function for category changes
+  // Track page view on mount
+  React.useEffect(() => {
+    try {
+      trackPageView('home', activeCategory);
+    } catch (error) {
+      console.warn('Analytics tracking failed:', error);
+    }
+  }, [activeCategory]);
+
+  // Wrapper function for category changes with tracking
   const handleCategoryChange = (category: 'Lost' | 'Found' | 'For Sale/Services') => {
+    try {
+      trackCategorySwitch(activeCategory, category);
+    } catch (error) {
+      console.warn('Analytics tracking failed:', error);
+    }
     onCategoryChange(category);
   };
   const [showAdminLogin, setShowAdminLogin] = useState(false);
