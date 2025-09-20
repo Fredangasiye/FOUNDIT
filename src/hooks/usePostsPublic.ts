@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { createPost, getPosts, getPostsByCategory, deletePost as firestoreDeletePost, updatePost } from '../services/firestoreService';
-import { trackAdminAction, trackBulkOperation } from '../utils/analytics';
+// import { trackAdminAction, trackBulkOperation } from '../utils/analytics';
 import { Post, CreatePostData } from '../types';
 
 // Admin configuration - change this to your details
@@ -241,9 +241,9 @@ export const usePosts = () => {
       await loadPosts(); // Reload posts after deletion
       
       // Track admin delete action
-      if (isAdmin) {
-        trackAdminAction('delete_post', postId);
-      }
+      // if (isAdmin) {
+      //   trackAdminAction('delete_post', postId);
+      // }
       
       return true;
     } catch (error: any) {
@@ -270,9 +270,9 @@ export const usePosts = () => {
       setPosts(updatedPosts);
       
       // Track admin edit action
-      if (isAdmin) {
-        trackAdminAction('edit_post', postId);
-      }
+      // if (isAdmin) {
+      //   trackAdminAction('edit_post', postId);
+      // }
       
       return true;
     } catch (error: any) {
@@ -301,18 +301,18 @@ export const usePosts = () => {
     setSelectedPosts(new Set(posts.map(post => post.id)));
     
     // Track bulk operation
-    if (isAdmin) {
-      trackBulkOperation('select_all', posts.length);
-    }
+    // if (isAdmin) {
+    //   trackBulkOperation('select_all', posts.length);
+    // }
   };
 
   const clearSelection = () => {
     setSelectedPosts(new Set());
     
     // Track bulk operation
-    if (isAdmin) {
-      trackBulkOperation('clear_selection', 0);
-    }
+    // if (isAdmin) {
+    //   trackBulkOperation('clear_selection', 0);
+    // }
   };
 
   const bulkDeletePosts = async (): Promise<boolean> => {
@@ -330,10 +330,10 @@ export const usePosts = () => {
       await Promise.all(deletePromises);
       
       // Track bulk delete action
-      if (isAdmin) {
-        trackAdminAction('bulk_delete', undefined, selectedPosts.size);
-        trackBulkOperation('bulk_delete', selectedPosts.size);
-      }
+      // if (isAdmin) {
+      //   trackAdminAction('bulk_delete', undefined, selectedPosts.size);
+      //   trackBulkOperation('bulk_delete', selectedPosts.size);
+      // }
       
       // Clear selection and reload posts
       setSelectedPosts(new Set());
@@ -361,7 +361,7 @@ export const usePosts = () => {
       window.dispatchEvent(new Event('storage'));
       
       // Track admin login
-      trackAdminAction('login');
+      // trackAdminAction('login');
       
       return true;
     }
@@ -376,7 +376,7 @@ export const usePosts = () => {
     window.dispatchEvent(new Event('storage'));
     
     // Track admin logout
-    trackAdminAction('logout');
+    // trackAdminAction('logout');
   };
 
   return {

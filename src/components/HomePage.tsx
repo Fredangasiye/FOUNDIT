@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { Plus, User, Share2, MessageCircle, Shield, LogOut, LogIn, Upload, X } from 'lucide-react';
 import { Post } from '../types';
 import { PostCard } from './PostCard';
-import { trackCategorySwitch, trackPageView } from '../utils/analytics';
+// import { trackCategorySwitch, trackPageView } from '../utils/analytics';
 import { uploadImage } from '../services/firestoreService';
 
 interface HomePageProps {
@@ -40,14 +40,8 @@ export const HomePage: React.FC<HomePageProps> = ({
   onClearSelection,
   onBulkDeletePosts
 }) => {
-  // Track page view on mount
-  React.useEffect(() => {
-    trackPageView('home', activeCategory);
-  }, [activeCategory]);
-
-  // Wrapper function for category changes with tracking
+  // Wrapper function for category changes
   const handleCategoryChange = (category: 'Lost' | 'Found' | 'For Sale/Services') => {
-    trackCategorySwitch(activeCategory, category);
     onCategoryChange(category);
   };
   const [showAdminLogin, setShowAdminLogin] = useState(false);

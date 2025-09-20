@@ -1,7 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { MessageCircle, Calendar, MapPin, DollarSign, Globe, Share2, Phone, Mail, User, Building } from 'lucide-react';
 import { Post } from '../types';
-import { trackContactClick } from '../utils/analytics';
+// import { trackContactClick } from '../utils/analytics';
 import { getOptimizedImageUrl } from '../services/imageService';
 
 interface PostCardProps {
@@ -53,7 +53,7 @@ export const OptimizedPostCard: React.FC<PostCardProps> = ({ post }) => {
     const whatsappUrl = `https://wa.me/${whatsappNumber}?text=${message}`;
     
     // Track contact click
-    trackContactClick('whatsapp', post.id, post.category);
+    // trackContactClick('whatsapp', post.id, post.category);
     
     window.open(whatsappUrl, '_blank');
   };
@@ -72,14 +72,14 @@ export const OptimizedPostCard: React.FC<PostCardProps> = ({ post }) => {
     }
     
     // Track contact click
-    trackContactClick('phone', post.id, post.category);
+    // trackContactClick('phone', post.id, post.category);
     
     window.open(`tel:${phoneNumber}`, '_self');
   };
 
   const handleEmailClick = () => {
     // Track contact click
-    trackContactClick('email', post.id, post.category);
+    // trackContactClick('email', post.id, post.category);
     
     window.open(`mailto:${post.contactEmail}`, '_self');
   };
