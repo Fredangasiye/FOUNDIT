@@ -69,9 +69,7 @@ export const HomePage: React.FC<HomePageProps> = ({
     if (window.confirm('Are you sure you want to delete this post?')) {
       if (onDeletePost) {
         const success = await onDeletePost(postId);
-        if (success) {
-          alert('Post deleted successfully');
-        } else {
+        if (!success) {
           alert('Failed to delete post');
         }
       }
