@@ -29,3 +29,5 @@ export interface Post {
   // Admin fields
   isAdminPost?: boolean;
 }
+
+export type CreatePostData = Omit<Post, 'id'>;

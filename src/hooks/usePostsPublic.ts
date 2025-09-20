@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { createPost, getPosts, getPostsByCategory, deletePost as firestoreDeletePost, updatePost } from '../services/firestoreService';
-import { Post } from '../types';
+import { Post, CreatePostData } from '../types';
 
 // Admin configuration - change this to your details
 const ADMIN_EMAIL = 'fred@foundit.com'; // Change this to your email
@@ -55,7 +55,7 @@ export const usePosts = () => {
   const addExamplePostsIfNeeded = async () => {
     // Only add examples if there are no posts
     if (posts.length === 0) {
-      const examplePosts: Omit<Post, 'id' | 'datePosted'>[] = [
+      const examplePosts: CreatePostData[] = [
         {
           title: "Lost: Black iPhone 13 Pro",
           description: "I lost my black iPhone 13 Pro yesterday evening around 7 PM. It has a clear case with a photo of my family inside. The phone was last seen near the main entrance. It's very important to me as it contains precious family photos. Please contact me if found!",
@@ -139,11 +139,11 @@ export const usePosts = () => {
       // Add each example post to Firebase
       for (const postData of examplePosts) {
         try {
-          await createPost({
+          const postId = await createPost({
             ...postData,
-            id: Date.now().toString() + Math.random().toString(36).substr(2, 9),
             datePosted: new Date()
           });
+          console.log(`Created example post with ID: ${postId}`);
         } catch (error) {
           console.error('Error adding example post:', error);
         }
@@ -184,7 +184,7 @@ export const usePosts = () => {
     }
   };
 
-  const addPost = async (postData: Omit<Post, 'id' | 'datePosted' | 'isAdminPost'>): Promise<boolean> => {
+  const addPost = async (postData: Omit<CreatePostData, 'datePosted' | 'isAdminPost'>): Promise<boolean> => {
     setLoading(true);
     setError(null);
 
