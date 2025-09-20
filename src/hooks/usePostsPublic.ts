@@ -7,6 +7,34 @@ import { Post, CreatePostData } from '../types';
 const ADMIN_EMAIL = 'fred@foundit.com'; // Change this to your email
 const ADMIN_PHONE = '0795774877'; // Change this to your phone
 
+// Generate a unique device fingerprint for admin persistence
+const getDeviceFingerprint = () => {
+  const canvas = document.createElement('canvas');
+  const ctx = canvas.getContext('2d');
+  if (ctx) {
+    ctx.textBaseline = 'top';
+    ctx.font = '14px Arial';
+    ctx.fillText('Device fingerprint', 2, 2);
+  }
+  
+  const fingerprint = [
+    navigator.userAgent,
+    navigator.language,
+    screen.width + 'x' + screen.height,
+    new Date().getTimezoneOffset(),
+    canvas.toDataURL()
+  ].join('|');
+  
+  // Create a simple hash of the fingerprint
+  let hash = 0;
+  for (let i = 0; i < fingerprint.length; i++) {
+    const char = fingerprint.charCodeAt(i);
+    hash = ((hash << 5) - hash) + char;
+    hash = hash & hash; // Convert to 32-bit integer
+  }
+  return Math.abs(hash).toString(36);
+};
+
 export const usePosts = () => {
   const [posts, setPosts] = useState<Post[]>([]);
   const [loading, setLoading] = useState(false);
@@ -16,11 +44,18 @@ export const usePosts = () => {
   });
   const [selectedPosts, setSelectedPosts] = useState<Set<string>>(new Set());
   
-  // Initialize admin state immediately
+  // Initialize admin state with device-specific check
   const checkAdminStatus = () => {
     const adminEmail = localStorage.getItem('foundit_admin_email');
     const adminPhone = localStorage.getItem('foundit_admin_phone');
-    return adminEmail === ADMIN_EMAIL && adminPhone === ADMIN_PHONE;
+    const adminDevice = localStorage.getItem('foundit_admin_device');
+    const currentDevice = getDeviceFingerprint();
+    
+    // Check if admin credentials match AND device matches
+    const credentialsMatch = adminEmail === ADMIN_EMAIL && adminPhone === ADMIN_PHONE;
+    const deviceMatches = adminDevice === currentDevice;
+    
+    return credentialsMatch && deviceMatches;
   };
   
   const [isAdmin, setIsAdmin] = useState(checkAdminStatus);
@@ -30,8 +65,14 @@ export const usePosts = () => {
     const checkAdmin = () => {
       const adminEmail = localStorage.getItem('foundit_admin_email');
       const adminPhone = localStorage.getItem('foundit_admin_phone');
-      const isAdminUser = adminEmail === ADMIN_EMAIL && adminPhone === ADMIN_PHONE;
-      return isAdminUser;
+      const adminDevice = localStorage.getItem('foundit_admin_device');
+      const currentDevice = getDeviceFingerprint();
+      
+      // Check if admin credentials match AND device matches
+      const credentialsMatch = adminEmail === ADMIN_EMAIL && adminPhone === ADMIN_PHONE;
+      const deviceMatches = adminDevice === currentDevice;
+      
+      return credentialsMatch && deviceMatches;
     };
     
     // Set admin state immediately
@@ -354,15 +395,20 @@ export const usePosts = () => {
 
   const handleAdminLogin = (email: string, phone: string) => {
     if (email === ADMIN_EMAIL && phone === ADMIN_PHONE) {
+      const deviceFingerprint = getDeviceFingerprint();
+      
       localStorage.setItem('foundit_admin_email', email);
       localStorage.setItem('foundit_admin_phone', phone);
+      localStorage.setItem('foundit_admin_device', deviceFingerprint);
       setIsAdmin(true);
+      
       // Trigger storage event for other tabs
       window.dispatchEvent(new Event('storage'));
       
       // Track admin login
       // trackAdminAction('login');
       
+      console.log('Admin login successful on device:', deviceFingerprint);
       return true;
     }
     return false;
@@ -371,12 +417,16 @@ export const usePosts = () => {
   const handleAdminLogout = () => {
     localStorage.removeItem('foundit_admin_email');
     localStorage.removeItem('foundit_admin_phone');
+    localStorage.removeItem('foundit_admin_device');
     setIsAdmin(false);
+    
     // Trigger storage event for other tabs
     window.dispatchEvent(new Event('storage'));
     
     // Track admin logout
     // trackAdminAction('logout');
+    
+    console.log('Admin logout - device access revoked');
   };
 
   return {
