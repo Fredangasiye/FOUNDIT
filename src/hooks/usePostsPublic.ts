@@ -53,12 +53,12 @@ export const usePosts = () => {
     loadPosts();
   }, []);
 
-  // Add example posts after posts are loaded
-  useEffect(() => {
-    if (!loading && posts.length === 0) {
-      addExamplePostsIfNeeded();
-    }
-  }, [loading, posts.length]);
+  // Add example posts after posts are loaded - DISABLED TO PREVENT DUPLICATES
+  // useEffect(() => {
+  //   if (!loading && posts.length === 0) {
+  //     addExamplePostsIfNeeded();
+  //   }
+  // }, [loading, posts.length]);
 
   const addExamplePostsIfNeeded = async () => {
     // Wait for posts to load first, then check if we need examples
