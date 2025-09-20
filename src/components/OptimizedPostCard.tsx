@@ -114,7 +114,7 @@ export const OptimizedPostCard: React.FC<PostCardProps> = ({ post }) => {
     >
       {/* Image Section with Lazy Loading */}
       {post.image && isVisible && (
-        <div className="relative h-48 bg-gray-100">
+        <div className="relative h-48 bg-gray-100 flex items-center justify-center">
           {!imageLoaded && (
             <div className="absolute inset-0 flex items-center justify-center">
               <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
@@ -123,7 +123,7 @@ export const OptimizedPostCard: React.FC<PostCardProps> = ({ post }) => {
           <img
             src={imageError ? '/placeholder-image.jpg' : optimizedImageUrl || post.image}
             alt={post.title}
-            className={`w-full h-full object-cover transition-opacity duration-300 ${
+            className={`max-w-full max-h-full object-contain transition-opacity duration-300 ${
               imageLoaded ? 'opacity-100' : 'opacity-0'
             }`}
             onLoad={handleImageLoad}

@@ -90,11 +90,11 @@ export const PostCard: React.FC<PostCardProps> = ({ post, isSelected = false, on
       )}
       {/* Image */}
       {post.image && (
-        <div className="h-48 bg-gray-200 overflow-hidden relative">
+        <div className="h-48 bg-gray-200 overflow-hidden relative flex items-center justify-center">
           <img
             src={post.image}
             alt={post.title}
-            className="w-full h-full object-cover hover:scale-105 transition-transform duration-300"
+            className="max-w-full max-h-full object-contain hover:scale-105 transition-transform duration-300"
           />
           {post.isAdminPost && (
             <div className="absolute top-2 right-2 bg-yellow-400 text-yellow-900 px-2 py-1 rounded text-xs font-semibold shadow-lg">
