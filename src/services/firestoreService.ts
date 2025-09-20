@@ -9,7 +9,8 @@ import {
   query, 
   where, 
   orderBy,
-  serverTimestamp 
+  serverTimestamp,
+  deleteDoc
 } from 'firebase/firestore';
 import { db } from '../config/firebase';
 import { User, Post, CreatePostData } from '../types';
@@ -125,5 +126,5 @@ export const updatePost = async (postId: string, postData: Partial<Post>): Promi
 
 export const deletePost = async (postId: string): Promise<void> => {
   const postRef = doc(db, 'posts', postId);
-  await updateDoc(postRef, { deleted: true });
+  await deleteDoc(postRef);
 }; 
