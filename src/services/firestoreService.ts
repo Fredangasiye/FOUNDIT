@@ -115,6 +115,14 @@ export const getPostsByUser = async (userPhone: string): Promise<Post[]> => {
 
 
 
+export const updatePost = async (postId: string, postData: Partial<Post>): Promise<void> => {
+  const postRef = doc(db, 'posts', postId);
+  await updateDoc(postRef, {
+    ...postData,
+    updatedAt: serverTimestamp()
+  });
+};
+
 export const deletePost = async (postId: string): Promise<void> => {
   const postRef = doc(db, 'posts', postId);
   await updateDoc(postRef, { deleted: true });

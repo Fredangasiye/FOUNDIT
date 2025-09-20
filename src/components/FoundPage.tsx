@@ -6,12 +6,12 @@ import { PostCard } from './PostCard';
 interface FoundPageProps {
   posts: Post[];
   onNavigate: (page: 'Home' | 'NewPost' | 'Profile') => void;
-  currentUser: UserType | null;
-  onLogout: () => void;
   loading?: boolean;
+  isAdmin?: boolean;
+  onDeletePost?: (postId: string) => Promise<boolean>;
 }
 
-export const FoundPage: React.FC<FoundPageProps> = ({ posts, onNavigate, currentUser, onLogout, loading = false }) => {
+export const FoundPage: React.FC<FoundPageProps> = ({ posts, onNavigate, loading = false, isAdmin = false, onDeletePost }) => {
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Header */}
@@ -27,13 +27,6 @@ export const FoundPage: React.FC<FoundPageProps> = ({ posts, onNavigate, current
             </button>
             <div className="flex items-center gap-3">
               <span className="text-lg font-semibold text-green-600">Found Items</span>
-              <button
-                onClick={onLogout}
-                className="flex items-center text-red-600 hover:text-red-700 transition-colors duration-200"
-              >
-                <LogOut className="w-5 h-5 mr-1" />
-                Logout
-              </button>
             </div>
           </div>
         </div>

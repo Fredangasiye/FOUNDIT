@@ -28,6 +28,7 @@ export const HomePage: React.FC<HomePageProps> = ({
   onDeletePost,
   onEditPost
 }) => {
+  console.log('HomePage rendered with isAdmin:', isAdmin);
   const [showAdminLogin, setShowAdminLogin] = useState(false);
   const [adminEmail, setAdminEmail] = useState('');
   const [adminPhone, setAdminPhone] = useState('');
