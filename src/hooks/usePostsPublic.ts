@@ -10,27 +10,40 @@ export const usePosts = () => {
   const [posts, setPosts] = useState<Post[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [isAdmin, setIsAdmin] = useState(false);
+  
+  // Initialize admin state immediately
+  const checkAdminStatus = () => {
+    const adminEmail = localStorage.getItem('foundit_admin_email');
+    const adminPhone = localStorage.getItem('foundit_admin_phone');
+    return adminEmail === ADMIN_EMAIL && adminPhone === ADMIN_PHONE;
+  };
+  
+  const [isAdmin, setIsAdmin] = useState(checkAdminStatus);
 
-  // Check if current user is admin
+  // Check if current user is admin on component mount and when posts change
   useEffect(() => {
     const checkAdmin = () => {
       const adminEmail = localStorage.getItem('foundit_admin_email');
       const adminPhone = localStorage.getItem('foundit_admin_phone');
-      return adminEmail === ADMIN_EMAIL && adminPhone === ADMIN_PHONE;
+      const isAdminUser = adminEmail === ADMIN_EMAIL && adminPhone === ADMIN_PHONE;
+      return isAdminUser;
     };
-    setIsAdmin(checkAdmin());
+    
+    // Set admin state immediately
+    const adminStatus = checkAdmin();
+    setIsAdmin(adminStatus);
+    
+    // Also listen for storage changes (in case admin logs in/out in another tab)
+    const handleStorageChange = () => {
+      setIsAdmin(checkAdmin());
+    };
+    
+    window.addEventListener('storage', handleStorageChange);
+    
+    return () => {
+      window.removeEventListener('storage', handleStorageChange);
+    };
   }, []);
-
-  // Re-check admin status when component re-renders
-  useEffect(() => {
-    const checkAdmin = () => {
-      const adminEmail = localStorage.getItem('foundit_admin_email');
-      const adminPhone = localStorage.getItem('foundit_admin_phone');
-      return adminEmail === ADMIN_EMAIL && adminPhone === ADMIN_PHONE;
-    };
-    setIsAdmin(checkAdmin());
-  }, [posts]);
 
   // Load posts from Firebase on component mount
   useEffect(() => {
@@ -140,6 +153,8 @@ export const usePosts = () => {
       localStorage.setItem('foundit_admin_email', email);
       localStorage.setItem('foundit_admin_phone', phone);
       setIsAdmin(true);
+      // Trigger storage event for other tabs
+      window.dispatchEvent(new Event('storage'));
       return true;
     }
     return false;
@@ -149,6 +164,8 @@ export const usePosts = () => {
     localStorage.removeItem('foundit_admin_email');
     localStorage.removeItem('foundit_admin_phone');
     setIsAdmin(false);
+    // Trigger storage event for other tabs
+    window.dispatchEvent(new Event('storage'));
   };
 
   return {
