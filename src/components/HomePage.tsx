@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { Plus, User, Share2, MessageCircle, Shield, LogOut, LogIn, Upload, X } from 'lucide-react';
 import { Post } from '../types';
 import { PostCard } from './PostCard';
-import { trackCategorySwitch, trackPageView } from '../utils/analytics';
+import { trackCategorySwitch, trackPageView, trackContactClick, trackAdminAction, trackPostCreated } from '../utils/analytics';
 import { uploadImage } from '../services/firestoreService';
 
 interface HomePageProps {
