@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { Analytics } from '@vercel/analytics/react';
 import { HomePage } from './components/HomePage';
 import { NewPostPage } from './components/NewPostPage';
 import { LostPage } from './components/LostPage';
@@ -82,74 +83,83 @@ function App() {
   // Main app pages
   const filteredPosts = getFilteredPosts(activeCategory);
 
-  switch (currentPage) {
-    case 'Home':
-      return (
-        <HomePage
-          posts={posts}
-          activeCategory={activeCategory}
-          onCategoryChange={setActiveCategory}
-          onNavigate={navigate}
-          loading={postsLoading}
-          isAdmin={isAdmin}
-          onAdminLogin={onAdminLogin}
-          onAdminLogout={onAdminLogout}
-          onDeletePost={deletePost}
-          onEditPost={editPost}
-          selectedPosts={selectedPosts}
-          onTogglePostSelection={togglePostSelection}
-          onSelectAllPosts={selectAllPosts}
-          onClearSelection={clearSelection}
-          onBulkDeletePosts={bulkDeletePosts}
-        />
-      );
-    case 'Lost':
-      return (
-        <LostPage
-          posts={getFilteredPosts('Lost')}
-          onNavigate={navigate}
-          loading={postsLoading}
-          isAdmin={isAdmin}
-          onDeletePost={deletePost}
-        />
-      );
-    case 'Found':
-      return (
-        <FoundPage
-          posts={getFilteredPosts('Found')}
-          onNavigate={navigate}
-          loading={postsLoading}
-          isAdmin={isAdmin}
-          onDeletePost={deletePost}
-        />
-      );
-    case 'ForSale':
-      return (
-        <ForSalePage
-          posts={getFilteredPosts('For Sale/Services')}
-          onNavigate={navigate}
-          loading={postsLoading}
-          isAdmin={isAdmin}
-          onDeletePost={deletePost}
-        />
-      );
-    case 'NewPost':
-      return <NewPostPage onCreatePost={handleCreatePost} onNavigate={navigate} />;
-    default:
-      return (
-        <HomePage
-          posts={filteredPosts}
-          activeCategory={activeCategory}
-          onCategoryChange={setActiveCategory}
-          onNavigate={navigate}
-          loading={postsLoading}
-          isAdmin={isAdmin}
-          onAdminLogin={handleAdminLogin}
-          onAdminLogout={handleAdminLogout}
-          onDeletePost={deletePost}
-        />
-      );
-  }
+  const renderPage = () => {
+    switch (currentPage) {
+      case 'Home':
+        return (
+          <HomePage
+            posts={posts}
+            activeCategory={activeCategory}
+            onCategoryChange={setActiveCategory}
+            onNavigate={navigate}
+            loading={postsLoading}
+            isAdmin={isAdmin}
+            onAdminLogin={onAdminLogin}
+            onAdminLogout={onAdminLogout}
+            onDeletePost={deletePost}
+            onEditPost={editPost}
+            selectedPosts={selectedPosts}
+            onTogglePostSelection={togglePostSelection}
+            onSelectAllPosts={selectAllPosts}
+            onClearSelection={clearSelection}
+            onBulkDeletePosts={bulkDeletePosts}
+          />
+        );
+      case 'Lost':
+        return (
+          <LostPage
+            posts={getFilteredPosts('Lost')}
+            onNavigate={navigate}
+            loading={postsLoading}
+            isAdmin={isAdmin}
+            onDeletePost={deletePost}
+          />
+        );
+      case 'Found':
+        return (
+          <FoundPage
+            posts={getFilteredPosts('Found')}
+            onNavigate={navigate}
+            loading={postsLoading}
+            isAdmin={isAdmin}
+            onDeletePost={deletePost}
+          />
+        );
+      case 'ForSale':
+        return (
+          <ForSalePage
+            posts={getFilteredPosts('For Sale/Services')}
+            onNavigate={navigate}
+            loading={postsLoading}
+            isAdmin={isAdmin}
+            onDeletePost={deletePost}
+          />
+        );
+      case 'NewPost':
+        return <NewPostPage onCreatePost={handleCreatePost} onNavigate={navigate} />;
+      default:
+        return (
+          <HomePage
+            posts={filteredPosts}
+            activeCategory={activeCategory}
+            onCategoryChange={setActiveCategory}
+            onNavigate={navigate}
+            loading={postsLoading}
+            isAdmin={isAdmin}
+            onAdminLogin={handleAdminLogin}
+            onAdminLogout={handleAdminLogout}
+            onDeletePost={deletePost}
+          />
+        );
+    }
+  };
+
+  return (
+    <>
+      {renderPage()}
+      <Analytics />
+    </>
+  );
 }
 
 export default App;
