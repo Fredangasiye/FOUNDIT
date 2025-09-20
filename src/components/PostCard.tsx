@@ -62,6 +62,27 @@ export const PostCard: React.FC<PostCardProps> = ({ post, isSelected = false, on
     window.open(`mailto:${post.contactEmail}`, '_self');
   };
 
+  const handleShareClick = async () => {
+    const shareData = {
+      title: post.title,
+      text: post.description,
+      url: window.location.href
+    };
+
+    try {
+      if (navigator.share) {
+        await navigator.share(shareData);
+      } else {
+        // Fallback: copy to clipboard
+        const shareText = `${post.title}\n\n${post.description}\n\nView on FOUNDIT: ${window.location.href}`;
+        await navigator.clipboard.writeText(shareText);
+        alert('Post details copied to clipboard!');
+      }
+    } catch (error) {
+      console.log('Share cancelled or failed:', error);
+    }
+  };
+
   const formatDate = (date: Date) => {
     return new Date(date).toLocaleDateString('en-US', {
       month: 'short',
@@ -85,7 +106,7 @@ export const PostCard: React.FC<PostCardProps> = ({ post, isSelected = false, on
   };
 
   return (
-    <div className={`bg-white rounded-xl shadow-md hover:shadow-lg transition-shadow duration-200 overflow-hidden ${isSelected ? 'ring-2 ring-blue-500' : ''}`}>
+    <div className={`bg-white rounded-2xl shadow-lg hover:shadow-xl border border-gray-100 hover:border-gray-200 transition-all duration-300 overflow-hidden transform hover:-translate-y-1 ${isSelected ? 'ring-2 ring-blue-500 shadow-blue-100' : ''}`}>
       {showCheckbox && onToggleSelection && (
         <div className="p-3 border-b border-gray-100">
           <label className="flex items-center cursor-pointer">
@@ -101,17 +122,25 @@ export const PostCard: React.FC<PostCardProps> = ({ post, isSelected = false, on
       )}
       {/* Image */}
       {post.image && (
-        <div className="h-48 bg-gray-200 overflow-hidden relative flex items-center justify-center">
+        <div className="h-48 bg-gradient-to-br from-gray-50 to-gray-100 overflow-hidden relative flex items-center justify-center group">
           <img
             src={post.image}
             alt={post.title}
-            className="max-w-full max-h-full object-contain hover:scale-105 transition-transform duration-300"
+            className="max-w-full max-h-full object-contain group-hover:scale-105 transition-transform duration-300"
           />
           {post.isAdminPost && (
-            <div className="absolute top-2 right-2 bg-yellow-400 text-yellow-900 px-2 py-1 rounded text-xs font-semibold shadow-lg">
+            <div className="absolute top-3 right-3 bg-yellow-400 text-yellow-900 px-3 py-1 rounded-full text-xs font-bold shadow-lg border border-yellow-300">
               EXAMPLE
             </div>
           )}
+          {/* Share Button Overlay */}
+          <button
+            onClick={handleShareClick}
+            className="absolute top-3 left-3 bg-white/90 hover:bg-white text-gray-700 hover:text-gray-900 p-2 rounded-full shadow-lg hover:shadow-xl transition-all duration-200 opacity-0 group-hover:opacity-100"
+            title="Share this post"
+          >
+            <Share2 className="w-4 h-4" />
+          </button>
         </div>
       )}
 
@@ -120,25 +149,25 @@ export const PostCard: React.FC<PostCardProps> = ({ post, isSelected = false, on
         {/* Header */}
         <div className="flex items-start justify-between mb-4">
           <div className="flex-1">
-            <h3 className="text-xl font-bold text-gray-900 mb-2">{post.title}</h3>
+            <h3 className="text-xl font-bold text-gray-900 mb-2 leading-tight">{post.title}</h3>
             {post.price && (
-              <div className="flex items-center gap-1 mb-2">
-                <DollarSign className="w-4 h-4 text-green-600" />
-                <span className="text-lg font-bold text-green-600">R{post.price.toFixed(2)}</span>
+              <div className="flex items-center gap-1 mb-3">
+                <DollarSign className="w-5 h-5 text-green-600" />
+                <span className="text-xl font-bold text-green-600">R{post.price.toFixed(2)}</span>
               </div>
             )}
             <div className="flex items-center gap-4 text-sm text-gray-600">
               <div className="flex items-center gap-1">
-                <MapPin className="w-4 h-4" />
-                <span>Unit {post.unitNumber}</span>
+                <MapPin className="w-4 h-4 text-gray-500" />
+                <span className="font-medium">Unit {post.unitNumber}</span>
               </div>
               <div className="flex items-center gap-1">
-                <Calendar className="w-4 h-4" />
-                <span>{formatDate(post.datePosted)}</span>
+                <Calendar className="w-4 h-4 text-gray-500" />
+                <span className="font-medium">{formatDate(post.datePosted)}</span>
               </div>
             </div>
           </div>
-          <span className={`px-3 py-1 rounded-full text-sm font-medium border ${getCategoryColor(post.category)}`}>
+          <span className={`px-4 py-2 rounded-full text-sm font-semibold border-2 ${getCategoryColor(post.category)} shadow-sm`}>
             {post.category}
           </span>
         </div>
@@ -207,13 +236,20 @@ export const PostCard: React.FC<PostCardProps> = ({ post, isSelected = false, on
           </div>
           
           {/* Contact Buttons */}
-          <div className="flex flex-wrap gap-2">
+          <div className="flex flex-wrap gap-3">
             <button
               onClick={handleWhatsAppClick}
-              className="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-lg font-medium transition-colors duration-200 flex items-center gap-2 shadow-md hover:shadow-lg"
+              className="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-lg font-medium transition-all duration-200 flex items-center gap-2 shadow-md hover:shadow-lg transform hover:-translate-y-0.5"
             >
               <MessageCircle className="w-4 h-4" />
               WhatsApp
+            </button>
+            <button
+              onClick={handleShareClick}
+              className="bg-gray-100 hover:bg-gray-200 text-gray-700 hover:text-gray-900 px-4 py-2 rounded-lg font-medium transition-all duration-200 flex items-center gap-2 shadow-md hover:shadow-lg transform hover:-translate-y-0.5 border border-gray-200"
+            >
+              <Share2 className="w-4 h-4" />
+              Share
             </button>
           </div>
         </div>

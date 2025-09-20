@@ -84,6 +84,27 @@ export const OptimizedPostCard: React.FC<PostCardProps> = ({ post }) => {
     window.open(`mailto:${post.contactEmail}`, '_self');
   };
 
+  const handleShareClick = async () => {
+    const shareData = {
+      title: post.title,
+      text: post.description,
+      url: window.location.href
+    };
+
+    try {
+      if (navigator.share) {
+        await navigator.share(shareData);
+      } else {
+        // Fallback: copy to clipboard
+        const shareText = `${post.title}\n\n${post.description}\n\nView on FOUNDIT: ${window.location.href}`;
+        await navigator.clipboard.writeText(shareText);
+        alert('Post details copied to clipboard!');
+      }
+    } catch (error) {
+      console.log('Share cancelled or failed:', error);
+    }
+  };
+
   const formatDate = (date: Date) => {
     return new Date(date).toLocaleDateString('en-US', {
       month: 'short',
@@ -121,11 +142,11 @@ export const OptimizedPostCard: React.FC<PostCardProps> = ({ post }) => {
   return (
     <div 
       ref={cardRef}
-      className="bg-white rounded-xl shadow-md hover:shadow-lg transition-all duration-300 overflow-hidden"
+      className="bg-white rounded-2xl shadow-lg hover:shadow-xl border border-gray-100 hover:border-gray-200 transition-all duration-300 overflow-hidden transform hover:-translate-y-1"
     >
       {/* Image Section with Lazy Loading */}
       {post.image && isVisible && (
-        <div className="relative h-48 bg-gray-100 flex items-center justify-center">
+        <div className="relative h-48 bg-gradient-to-br from-gray-50 to-gray-100 flex items-center justify-center group">
           {!imageLoaded && (
             <div className="absolute inset-0 flex items-center justify-center">
               <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
@@ -134,13 +155,26 @@ export const OptimizedPostCard: React.FC<PostCardProps> = ({ post }) => {
           <img
             src={imageError ? '/placeholder-image.jpg' : optimizedImageUrl || post.image}
             alt={post.title}
-            className={`max-w-full max-h-full object-contain transition-opacity duration-300 ${
+            className={`max-w-full max-h-full object-contain transition-all duration-300 group-hover:scale-105 ${
               imageLoaded ? 'opacity-100' : 'opacity-0'
             }`}
             onLoad={handleImageLoad}
             onError={handleImageError}
             loading="lazy"
           />
+          {post.isAdminPost && (
+            <div className="absolute top-3 right-3 bg-yellow-400 text-yellow-900 px-3 py-1 rounded-full text-xs font-bold shadow-lg border border-yellow-300">
+              EXAMPLE
+            </div>
+          )}
+          {/* Share Button Overlay */}
+          <button
+            onClick={handleShareClick}
+            className="absolute top-3 left-3 bg-white/90 hover:bg-white text-gray-700 hover:text-gray-900 p-2 rounded-full shadow-lg hover:shadow-xl transition-all duration-200 opacity-0 group-hover:opacity-100"
+            title="Share this post"
+          >
+            <Share2 className="w-4 h-4" />
+          </button>
         </div>
       )}
 
@@ -233,7 +267,7 @@ export const OptimizedPostCard: React.FC<PostCardProps> = ({ post }) => {
               {/* Phone */}
               <button
                 onClick={handlePhoneClick}
-                className="flex items-center gap-2 px-3 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors text-sm"
+                className="flex items-center gap-2 px-3 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-all duration-200 text-sm shadow-sm hover:shadow-md transform hover:-translate-y-0.5"
               >
                 <Phone className="w-4 h-4" />
                 Call
@@ -242,7 +276,7 @@ export const OptimizedPostCard: React.FC<PostCardProps> = ({ post }) => {
               {/* WhatsApp */}
               <button
                 onClick={handleWhatsAppClick}
-                className="flex items-center gap-2 px-3 py-2 bg-green-100 text-green-700 rounded-lg hover:bg-green-200 transition-colors text-sm"
+                className="flex items-center gap-2 px-3 py-2 bg-green-100 text-green-700 rounded-lg hover:bg-green-200 transition-all duration-200 text-sm shadow-sm hover:shadow-md transform hover:-translate-y-0.5"
               >
                 <MessageCircle className="w-4 h-4" />
                 WhatsApp
@@ -251,10 +285,19 @@ export const OptimizedPostCard: React.FC<PostCardProps> = ({ post }) => {
               {/* Email */}
               <button
                 onClick={handleEmailClick}
-                className="flex items-center gap-2 px-3 py-2 bg-blue-100 text-blue-700 rounded-lg hover:bg-blue-200 transition-colors text-sm"
+                className="flex items-center gap-2 px-3 py-2 bg-blue-100 text-blue-700 rounded-lg hover:bg-blue-200 transition-all duration-200 text-sm shadow-sm hover:shadow-md transform hover:-translate-y-0.5"
               >
                 <Mail className="w-4 h-4" />
                 Email
+              </button>
+
+              {/* Share */}
+              <button
+                onClick={handleShareClick}
+                className="flex items-center gap-2 px-3 py-2 bg-purple-100 text-purple-700 rounded-lg hover:bg-purple-200 transition-all duration-200 text-sm shadow-sm hover:shadow-md transform hover:-translate-y-0.5"
+              >
+                <Share2 className="w-4 h-4" />
+                Share
               </button>
             </div>
           </div>
