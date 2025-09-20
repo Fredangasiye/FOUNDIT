@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Plus, User, Share2, MessageCircle, Shield, LogOut, LogIn, Upload, X } from 'lucide-react';
 import { Post } from '../types';
 import { PostCard } from './PostCard';
+import { trackCategorySwitch, trackPageView } from '../utils/analytics';
 import { uploadImage } from '../services/firestoreService';
 
 interface HomePageProps {
@@ -39,6 +40,16 @@ export const HomePage: React.FC<HomePageProps> = ({
   onClearSelection,
   onBulkDeletePosts
 }) => {
+  // Track page view on mount
+  React.useEffect(() => {
+    trackPageView('home', activeCategory);
+  }, [activeCategory]);
+
+  // Wrapper function for category changes with tracking
+  const handleCategoryChange = (category: 'Lost' | 'Found' | 'For Sale/Services') => {
+    trackCategorySwitch(activeCategory, category);
+    onCategoryChange(category);
+  };
   const [showAdminLogin, setShowAdminLogin] = useState(false);
   const [adminEmail, setAdminEmail] = useState('');
   const [adminPhone, setAdminPhone] = useState('');
@@ -367,7 +378,7 @@ export const HomePage: React.FC<HomePageProps> = ({
             {categories.map((category) => (
               <button
                 key={category.name}
-                onClick={() => onCategoryChange(category.name as 'Lost' | 'Found' | 'For Sale/Services')}
+                onClick={() => handleCategoryChange(category.name as 'Lost' | 'Found' | 'For Sale/Services')}
                 className={`relative p-4 rounded-lg border-2 transition-all duration-200 transform ${
                   activeCategory === category.name
                     ? `${category.activeColor} border-transparent shadow-lg scale-105 ring-2 ring-blue-500 ring-opacity-50`

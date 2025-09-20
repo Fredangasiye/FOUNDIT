@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { createPost, getPosts, getPostsByCategory, deletePost as firestoreDeletePost, updatePost } from '../services/firestoreService';
+import { trackAdminAction, trackBulkOperation } from '../utils/analytics';
 import { Post, CreatePostData } from '../types';
 
 // Admin configuration - change this to your details
@@ -238,6 +239,12 @@ export const usePosts = () => {
     try {
       await firestoreDeletePost(postId);
       await loadPosts(); // Reload posts after deletion
+      
+      // Track admin delete action
+      if (isAdmin) {
+        trackAdminAction('delete_post', postId);
+      }
+      
       return true;
     } catch (error: any) {
       console.error('Error deleting post:', error);
@@ -261,6 +268,12 @@ export const usePosts = () => {
         post.id === postId ? { ...post, ...updatedData } : post
       );
       setPosts(updatedPosts);
+      
+      // Track admin edit action
+      if (isAdmin) {
+        trackAdminAction('edit_post', postId);
+      }
+      
       return true;
     } catch (error: any) {
       console.error('Error editing post:', error);
@@ -286,10 +299,20 @@ export const usePosts = () => {
 
   const selectAllPosts = () => {
     setSelectedPosts(new Set(posts.map(post => post.id)));
+    
+    // Track bulk operation
+    if (isAdmin) {
+      trackBulkOperation('select_all', posts.length);
+    }
   };
 
   const clearSelection = () => {
     setSelectedPosts(new Set());
+    
+    // Track bulk operation
+    if (isAdmin) {
+      trackBulkOperation('clear_selection', 0);
+    }
   };
 
   const bulkDeletePosts = async (): Promise<boolean> => {
@@ -305,6 +328,12 @@ export const usePosts = () => {
       );
       
       await Promise.all(deletePromises);
+      
+      // Track bulk delete action
+      if (isAdmin) {
+        trackAdminAction('bulk_delete', undefined, selectedPosts.size);
+        trackBulkOperation('bulk_delete', selectedPosts.size);
+      }
       
       // Clear selection and reload posts
       setSelectedPosts(new Set());
@@ -330,6 +359,10 @@ export const usePosts = () => {
       setIsAdmin(true);
       // Trigger storage event for other tabs
       window.dispatchEvent(new Event('storage'));
+      
+      // Track admin login
+      trackAdminAction('login');
+      
       return true;
     }
     return false;
@@ -341,6 +374,9 @@ export const usePosts = () => {
     setIsAdmin(false);
     // Trigger storage event for other tabs
     window.dispatchEvent(new Event('storage'));
+    
+    // Track admin logout
+    trackAdminAction('logout');
   };
 
   return {

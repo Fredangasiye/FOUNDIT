@@ -1,6 +1,7 @@
 import React from 'react';
 import { MessageCircle, Calendar, MapPin, DollarSign, Globe, Share2 } from 'lucide-react';
 import { Post } from '../types';
+import { trackContactClick } from '../utils/analytics';
 
 interface PostCardProps {
   post: Post;
@@ -28,6 +29,10 @@ export const PostCard: React.FC<PostCardProps> = ({ post, isSelected = false, on
     }
     
     const whatsappUrl = `https://wa.me/${whatsappNumber}?text=${message}`;
+    
+    // Track contact click
+    trackContactClick('whatsapp', post.id, post.category);
+    
     window.open(whatsappUrl, '_blank');
   };
 
@@ -44,10 +49,16 @@ export const PostCard: React.FC<PostCardProps> = ({ post, isSelected = false, on
       phoneNumber = '+' + phoneNumber;
     }
     
+    // Track contact click
+    trackContactClick('phone', post.id, post.category);
+    
     window.open(`tel:${phoneNumber}`, '_self');
   };
 
   const handleEmailClick = () => {
+    // Track contact click
+    trackContactClick('email', post.id, post.category);
+    
     window.open(`mailto:${post.contactEmail}`, '_self');
   };
 

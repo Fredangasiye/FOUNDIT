@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { ArrowLeft, Upload, X, Send, Globe, Share2 } from 'lucide-react';
 import { uploadImage, validateImageFile } from '../services/imageService';
+import { trackPostCreated, trackImageUpload } from '../utils/analytics';
 
 interface NewPostPageProps {
   onCreatePost: (postData: {
@@ -99,6 +100,10 @@ export const NewPostPage: React.FC<NewPostPageProps> = ({ onCreatePost, onNaviga
     }
     
     await new Promise(resolve => setTimeout(resolve, 500));
+    
+    // Track post creation
+    trackPostCreated(formData.category, !!formData.image);
+    
     onCreatePost(postData);
     setLoading(false);
   };
@@ -127,6 +132,7 @@ export const NewPostPage: React.FC<NewPostPageProps> = ({ onCreatePost, onNaviga
           imagePath: result.path
         }));
         console.log('Image uploaded successfully:', result.url);
+        trackImageUpload(true, file.size);
       } else {
         // Still set the image (fallback) but show warning
         setFormData(prev => ({ 
@@ -136,10 +142,12 @@ export const NewPostPage: React.FC<NewPostPageProps> = ({ onCreatePost, onNaviga
         }));
         console.warn('Image upload failed, using fallback:', result.error);
         alert('Image upload failed, but you can still create the post. The image will show a placeholder.');
+        trackImageUpload(false, file.size);
       }
     } catch (error) {
       console.error("Image upload error:", error);
       alert("Failed to upload image. Please try again.");
+      trackImageUpload(false, file.size);
     } finally {
       setLoading(false);
     }
