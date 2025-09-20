@@ -154,10 +154,22 @@ function App() {
     }
   };
 
+  // Debug: Log when Analytics component is rendered
+  React.useEffect(() => {
+    console.log('Analytics component mounted');
+    // Test analytics tracking
+    if (typeof window !== 'undefined' && window.va) {
+      console.log('Vercel Analytics is available');
+      window.va('track', 'page_view', { page: 'home' });
+    } else {
+      console.log('Vercel Analytics not yet available');
+    }
+  }, []);
+
   return (
     <>
       {renderPage()}
-      <Analytics />
+      <Analytics mode="production" />
     </>
   );
 }
