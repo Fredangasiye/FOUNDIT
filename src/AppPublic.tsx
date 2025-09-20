@@ -20,8 +20,8 @@ function App() {
     editPost,
     loadPostsByCategory,
     getFilteredPosts,
-    loginAsAdmin,
-    logoutAdmin
+    handleAdminLogin,
+    handleAdminLogout
   } = usePosts();
 
   const handleCreatePost = async (postData: any): Promise<boolean> => {
@@ -36,12 +36,12 @@ function App() {
     setCurrentPage(page);
   };
 
-  const handleAdminLogin = (email: string, phone: string): boolean => {
-    return loginAsAdmin(email, phone);
+  const onAdminLogin = (email: string, phone: string): boolean => {
+    return handleAdminLogin(email, phone);
   };
 
-  const handleAdminLogout = (): void => {
-    logoutAdmin();
+  const onAdminLogout = (): void => {
+    handleAdminLogout();
   };
 
   // Show loading state while posts are being loaded
@@ -87,9 +87,10 @@ function App() {
           onNavigate={navigate}
           loading={postsLoading}
           isAdmin={isAdmin}
-          onAdminLogin={handleAdminLogin}
-          onAdminLogout={handleAdminLogout}
+          onAdminLogin={onAdminLogin}
+          onAdminLogout={onAdminLogout}
           onDeletePost={deletePost}
+          onEditPost={editPost}
         />
       );
     case 'Lost':

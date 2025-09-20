@@ -13,6 +13,7 @@ interface HomePageProps {
   onAdminLogin?: (email: string, phone: string) => boolean;
   onAdminLogout?: () => void;
   onDeletePost?: (postId: string) => Promise<boolean>;
+  onEditPost?: (postId: string, updatedData: Partial<Post>) => Promise<boolean>;
 }
 
 export const HomePage: React.FC<HomePageProps> = ({
@@ -24,7 +25,8 @@ export const HomePage: React.FC<HomePageProps> = ({
   isAdmin = false,
   onAdminLogin,
   onAdminLogout,
-  onDeletePost
+  onDeletePost,
+  onEditPost
 }) => {
   const [showAdminLogin, setShowAdminLogin] = useState(false);
   const [adminEmail, setAdminEmail] = useState('');
@@ -49,9 +51,21 @@ export const HomePage: React.FC<HomePageProps> = ({
   };
 
   const handleDeletePost = async (postId: string) => {
-    if (onDeletePost && window.confirm('Are you sure you want to delete this post?')) {
-      await onDeletePost(postId);
+    if (window.confirm('Are you sure you want to delete this post?')) {
+      if (onDeletePost) {
+        const success = await onDeletePost(postId);
+        if (success) {
+          alert('Post deleted successfully');
+        } else {
+          alert('Failed to delete post');
+        }
+      }
     }
+  };
+
+  const handleEditPost = (postId: string) => {
+    // For now, just show an alert. In a real app, you'd open an edit modal
+    alert('Edit functionality coming soon! Post ID: ' + postId);
   };
 
   const getCategoryCount = (category: 'Lost' | 'Found' | 'For Sale/Services') => {
@@ -220,15 +234,26 @@ export const HomePage: React.FC<HomePageProps> = ({
               <div key={post.id} className="relative">
                 <PostCard post={post} />
                 {isAdmin && (
-                  <button
-                    onClick={() => handleDeletePost(post.id)}
-                    className="absolute top-2 right-2 bg-red-500 hover:bg-red-600 text-white p-2 rounded-full shadow-lg transition-colors duration-200"
-                    title="Delete Post"
-                  >
-                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                    </svg>
-                  </button>
+                  <div className="absolute top-2 right-2 flex gap-2">
+                    <button
+                      onClick={() => handleEditPost(post.id)}
+                      className="bg-blue-500 hover:bg-blue-600 text-white p-2 rounded-full shadow-lg transition-colors duration-200"
+                      title="Edit Post"
+                    >
+                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                      </svg>
+                    </button>
+                    <button
+                      onClick={() => handleDeletePost(post.id)}
+                      className="bg-red-500 hover:bg-red-600 text-white p-2 rounded-full shadow-lg transition-colors duration-200"
+                      title="Delete Post"
+                    >
+                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                      </svg>
+                    </button>
+                  </div>
                 )}
               </div>
             ))}
@@ -251,7 +276,7 @@ export const HomePage: React.FC<HomePageProps> = ({
                   value={adminEmail}
                   onChange={(e) => setAdminEmail(e.target.value)}
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  placeholder="admin@foundit.com"
+                  placeholder="fred@foundit.com"
                 />
               </div>
               <div>
@@ -263,7 +288,7 @@ export const HomePage: React.FC<HomePageProps> = ({
                   value={adminPhone}
                   onChange={(e) => setAdminPhone(e.target.value)}
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  placeholder="+1234567890"
+                  placeholder="+27795778455"
                 />
               </div>
             </div>

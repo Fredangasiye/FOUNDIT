@@ -1,10 +1,10 @@
 import { useState, useEffect } from 'react';
-import { createPost, getPosts, getPostsByCategory, deletePost as firestoreDeletePost } from '../services/firestoreService';
+import { createPost, getPosts, getPostsByCategory, deletePost as firestoreDeletePost, updatePost } from '../services/firestoreService';
 import { Post } from '../types';
 
 // Admin configuration - change this to your details
-const ADMIN_EMAIL = 'admin@foundit.com'; // Change this to your email
-const ADMIN_PHONE = '+1234567890'; // Change this to your phone
+const ADMIN_EMAIL = 'fred@foundit.com'; // Change this to your email
+const ADMIN_PHONE = '+27795778455'; // Change this to your phone
 
 export const usePosts = () => {
   const [posts, setPosts] = useState<Post[]>([]);
@@ -104,6 +104,9 @@ export const usePosts = () => {
     
     try {
       // Update post in Firebase
+      await updatePost(postId, updatedData);
+      
+      // Update local state
       const updatedPosts = posts.map(post => 
         post.id === postId ? { ...post, ...updatedData } : post
       );
