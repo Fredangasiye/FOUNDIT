@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
-import { Analytics } from '@vercel/analytics/react';
-import { SpeedInsights } from '@vercel/speed-insights/react';
+// import { Analytics } from '@vercel/analytics/react';
+// import { SpeedInsights } from '@vercel/speed-insights/react';
 import { HomePage } from './components/HomePage';
 import { NewPostPage } from './components/NewPostPage';
 import { LostPage } from './components/LostPage';
@@ -9,9 +9,11 @@ import { ForSalePage } from './components/ForSalePage';
 import { usePosts } from './hooks/usePostsPublic';
 
 function App() {
+  console.log('App component initializing...');
   const [currentPage, setCurrentPage] = useState<'Home' | 'NewPost' | 'Lost' | 'Found' | 'ForSale'>('Home');
   const [activeCategory, setActiveCategory] = useState<'Lost' | 'Found' | 'For Sale/Services'>('Lost');
   
+  console.log('About to call usePosts hook...');
   const {
     posts,
     loading: postsLoading,
@@ -30,6 +32,7 @@ function App() {
     clearSelection,
     bulkDeletePosts
   } = usePosts();
+  console.log('usePosts hook completed', { posts: posts.length, loading: postsLoading, error: postsError });
 
   const handleCreatePost = async (postData: any): Promise<boolean> => {
     const success = await addPost(postData);
@@ -155,19 +158,9 @@ function App() {
     }
   };
 
-  // Analytics tracking
-  React.useEffect(() => {
-    // Track page view
-    if (typeof window !== 'undefined' && window.va) {
-      window.va('track', 'page_view', { page: 'home' });
-    }
-  }, []);
-
   return (
     <>
       {renderPage()}
-      <Analytics />
-      <SpeedInsights />
     </>
   );
 }
