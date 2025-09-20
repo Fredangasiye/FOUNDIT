@@ -197,7 +197,6 @@ export const HomePage: React.FC<HomePageProps> = ({
         setEditingPost(null);
         setSelectedFile(null);
         setImagePreview(null);
-        alert('Post updated successfully!');
       } else {
         alert('Failed to update post');
       }
