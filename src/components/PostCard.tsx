@@ -4,9 +4,12 @@ import { Post } from '../types';
 
 interface PostCardProps {
   post: Post;
+  isSelected?: boolean;
+  onToggleSelection?: (postId: string) => void;
+  showCheckbox?: boolean;
 }
 
-export const PostCard: React.FC<PostCardProps> = ({ post }) => {
+export const PostCard: React.FC<PostCardProps> = ({ post, isSelected = false, onToggleSelection, showCheckbox = false }) => {
   const handleWhatsAppClick = () => {
     const message = encodeURIComponent(`Hi! I saw your post on FOUNDIT about "${post.title}".`);
     const whatsappUrl = `https://wa.me/${post.contactWhatsApp || post.contactPhone}?text=${message}`;
@@ -44,7 +47,20 @@ export const PostCard: React.FC<PostCardProps> = ({ post }) => {
   };
 
   return (
-    <div className="bg-white rounded-xl shadow-md hover:shadow-lg transition-shadow duration-200 overflow-hidden">
+    <div className={`bg-white rounded-xl shadow-md hover:shadow-lg transition-shadow duration-200 overflow-hidden ${isSelected ? 'ring-2 ring-blue-500' : ''}`}>
+      {showCheckbox && onToggleSelection && (
+        <div className="p-3 border-b border-gray-100">
+          <label className="flex items-center cursor-pointer">
+            <input
+              type="checkbox"
+              checked={isSelected}
+              onChange={() => onToggleSelection(post.id)}
+              className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 focus:ring-2"
+            />
+            <span className="ml-2 text-sm text-gray-600">Select this post</span>
+          </label>
+        </div>
+      )}
       {/* Image */}
       {post.image && (
         <div className="h-48 bg-gray-200 overflow-hidden relative">

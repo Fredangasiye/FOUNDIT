@@ -13,6 +13,7 @@ export const usePosts = () => {
   const [examplePostsAdded, setExamplePostsAdded] = useState(() => {
     return localStorage.getItem('foundit_example_posts_added') === 'true';
   });
+  const [selectedPosts, setSelectedPosts] = useState<Set<string>>(new Set());
   
   // Initialize admin state immediately
   const checkAdminStatus = () => {
@@ -270,6 +271,54 @@ export const usePosts = () => {
     }
   };
 
+  // Bulk delete functions
+  const togglePostSelection = (postId: string) => {
+    setSelectedPosts(prev => {
+      const newSet = new Set(prev);
+      if (newSet.has(postId)) {
+        newSet.delete(postId);
+      } else {
+        newSet.add(postId);
+      }
+      return newSet;
+    });
+  };
+
+  const selectAllPosts = () => {
+    setSelectedPosts(new Set(posts.map(post => post.id)));
+  };
+
+  const clearSelection = () => {
+    setSelectedPosts(new Set());
+  };
+
+  const bulkDeletePosts = async (): Promise<boolean> => {
+    if (selectedPosts.size === 0) return false;
+    
+    setLoading(true);
+    setError(null);
+    
+    try {
+      // Delete all selected posts
+      const deletePromises = Array.from(selectedPosts).map(postId => 
+        firestoreDeletePost(postId)
+      );
+      
+      await Promise.all(deletePromises);
+      
+      // Clear selection and reload posts
+      setSelectedPosts(new Set());
+      await loadPosts();
+      return true;
+    } catch (error: any) {
+      console.error('Error bulk deleting posts:', error);
+      setError(error.message || 'Failed to delete posts');
+      return false;
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const getFilteredPosts = (category: string) => {
     return posts.filter(post => post.category === category);
   };
@@ -299,6 +348,7 @@ export const usePosts = () => {
     loading,
     error,
     isAdmin,
+    selectedPosts,
     addPost,
     deletePost,
     editPost,
@@ -306,6 +356,10 @@ export const usePosts = () => {
     loadPostsByCategory,
     getFilteredPosts,
     handleAdminLogin,
-    handleAdminLogout
+    handleAdminLogout,
+    togglePostSelection,
+    selectAllPosts,
+    clearSelection,
+    bulkDeletePosts
   };
 };

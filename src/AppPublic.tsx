@@ -15,13 +15,18 @@ function App() {
     loading: postsLoading,
     error: postsError,
     isAdmin,
+    selectedPosts,
     addPost,
     deletePost,
     editPost,
     loadPostsByCategory,
     getFilteredPosts,
     handleAdminLogin,
-    handleAdminLogout
+    handleAdminLogout,
+    togglePostSelection,
+    selectAllPosts,
+    clearSelection,
+    bulkDeletePosts
   } = usePosts();
 
   const handleCreatePost = async (postData: any): Promise<boolean> => {
@@ -91,6 +96,11 @@ function App() {
           onAdminLogout={onAdminLogout}
           onDeletePost={deletePost}
           onEditPost={editPost}
+          selectedPosts={selectedPosts}
+          onTogglePostSelection={togglePostSelection}
+          onSelectAllPosts={selectAllPosts}
+          onClearSelection={clearSelection}
+          onBulkDeletePosts={bulkDeletePosts}
         />
       );
     case 'Lost':

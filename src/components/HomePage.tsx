@@ -14,6 +14,11 @@ interface HomePageProps {
   onAdminLogout?: () => void;
   onDeletePost?: (postId: string) => Promise<boolean>;
   onEditPost?: (postId: string, updatedData: Partial<Post>) => Promise<boolean>;
+  selectedPosts?: Set<string>;
+  onTogglePostSelection?: (postId: string) => void;
+  onSelectAllPosts?: () => void;
+  onClearSelection?: () => void;
+  onBulkDeletePosts?: () => Promise<boolean>;
 }
 
 export const HomePage: React.FC<HomePageProps> = ({
@@ -26,7 +31,12 @@ export const HomePage: React.FC<HomePageProps> = ({
   onAdminLogin,
   onAdminLogout,
   onDeletePost,
-  onEditPost
+  onEditPost,
+  selectedPosts = new Set(),
+  onTogglePostSelection,
+  onSelectAllPosts,
+  onClearSelection,
+  onBulkDeletePosts
 }) => {
   const [showAdminLogin, setShowAdminLogin] = useState(false);
   const [adminEmail, setAdminEmail] = useState('');
@@ -46,6 +56,7 @@ export const HomePage: React.FC<HomePageProps> = ({
     website: '',
     socialMedia: ''
   });
+  const [bulkMode, setBulkMode] = useState(false);
   const categories = [
     { name: 'Lost', color: 'bg-red-100 text-red-800 border-red-200', activeColor: 'bg-red-500 text-white' },
     { name: 'Found', color: 'bg-green-100 text-green-800 border-green-200', activeColor: 'bg-green-500 text-white' },
@@ -146,6 +157,26 @@ export const HomePage: React.FC<HomePageProps> = ({
     return posts.filter(post => post.category === category).length;
   };
 
+  const handleBulkDelete = async () => {
+    if (selectedPosts.size === 0) return;
+    
+    if (window.confirm(`Are you sure you want to delete ${selectedPosts.size} selected post(s)?`)) {
+      if (onBulkDeletePosts) {
+        const success = await onBulkDeletePosts();
+        if (success) {
+          setBulkMode(false);
+        }
+      }
+    }
+  };
+
+  const toggleBulkMode = () => {
+    setBulkMode(!bulkMode);
+    if (bulkMode && onClearSelection) {
+      onClearSelection();
+    }
+  };
+
   // Filter posts for display based on active category
   const filteredPosts = posts.filter(post => post.category === activeCategory);
 
@@ -210,6 +241,19 @@ export const HomePage: React.FC<HomePageProps> = ({
                     <Shield className="w-4 h-4" />
                     Admin
                   </span>
+                  <button
+                    onClick={toggleBulkMode}
+                    className={`p-2 rounded-full transition-all duration-200 ${
+                      bulkMode 
+                        ? 'text-blue-600 bg-blue-100' 
+                        : 'text-gray-600 hover:text-blue-600 hover:bg-blue-50'
+                    }`}
+                    title={bulkMode ? "Exit Bulk Mode" : "Bulk Delete Mode"}
+                  >
+                    <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                  </button>
                   <button
                     onClick={onAdminLogout}
                     className="p-2 text-gray-600 hover:text-red-600 hover:bg-red-50 rounded-full transition-all duration-200"
@@ -304,10 +348,53 @@ export const HomePage: React.FC<HomePageProps> = ({
           </div>
         ) : (
           <div className="space-y-4">
+            {bulkMode && isAdmin && (
+              <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-4">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-4">
+                    <span className="text-sm font-medium text-blue-800">
+                      {selectedPosts.size} post(s) selected
+                    </span>
+                    <div className="flex gap-2">
+                      <button
+                        onClick={onSelectAllPosts}
+                        className="text-sm text-blue-600 hover:text-blue-800 underline"
+                      >
+                        Select All
+                      </button>
+                      <button
+                        onClick={onClearSelection}
+                        className="text-sm text-blue-600 hover:text-blue-800 underline"
+                      >
+                        Clear Selection
+                      </button>
+                    </div>
+                  </div>
+                  <div className="flex gap-2">
+                    <button
+                      onClick={handleBulkDelete}
+                      disabled={selectedPosts.size === 0}
+                      className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors duration-200 ${
+                        selectedPosts.size === 0
+                          ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                          : 'bg-red-600 text-white hover:bg-red-700'
+                      }`}
+                    >
+                      Delete Selected ({selectedPosts.size})
+                    </button>
+                  </div>
+                </div>
+              </div>
+            )}
             {filteredPosts.map((post) => (
               <div key={post.id} className="relative">
-                <PostCard post={post} />
-                {isAdmin && (
+                <PostCard 
+                  post={post} 
+                  isSelected={selectedPosts.has(post.id)}
+                  onToggleSelection={onTogglePostSelection}
+                  showCheckbox={bulkMode && isAdmin}
+                />
+                {isAdmin && !bulkMode && (
                   <div className="absolute top-2 right-2 flex gap-2">
                     <button
                       onClick={() => handleEditPost(post.id)}
