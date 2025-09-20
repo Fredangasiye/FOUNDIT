@@ -52,7 +52,7 @@ export const HomePage: React.FC<HomePageProps> = ({
 
   // Test analytics function
   const testAnalytics = () => {
-    console.log('Testing analytics manually...');
+    console.log('Testing analytics manually... v2.1');
     console.log('Available functions:', { 
       trackPageView: typeof trackPageView, 
       trackCategorySwitch: typeof trackCategorySwitch, 
@@ -60,6 +60,22 @@ export const HomePage: React.FC<HomePageProps> = ({
       trackAdminAction: typeof trackAdminAction, 
       trackPostCreated: typeof trackPostCreated 
     });
+    
+    // Test Vercel Analytics directly first
+    if (typeof window !== 'undefined' && window.va) {
+      console.log('Testing Vercel Analytics directly...');
+      try {
+        window.va('track', 'test_direct', { 
+          timestamp: new Date().toISOString(),
+          test: 'direct_call' 
+        });
+        console.log('Direct Vercel Analytics call successful!');
+      } catch (error) {
+        console.error('Direct Vercel Analytics call failed:', error);
+      }
+    } else {
+      console.log('Vercel Analytics not available');
+    }
     
     try {
       console.log('Testing trackPageView...');
@@ -411,7 +427,7 @@ export const HomePage: React.FC<HomePageProps> = ({
               <button
                 onClick={testAnalytics}
                 className="p-2 text-gray-600 hover:text-green-600 hover:bg-green-50 rounded-full transition-all duration-200"
-                title="Test Analytics"
+                title="Test Analytics - v2"
               >
                 📊
               </button>
