@@ -53,12 +53,30 @@ export const HomePage: React.FC<HomePageProps> = ({
   // Test analytics function
   const testAnalytics = () => {
     console.log('Testing analytics manually...');
+    console.log('Available functions:', { 
+      trackPageView: typeof trackPageView, 
+      trackCategorySwitch: typeof trackCategorySwitch, 
+      trackContactClick: typeof trackContactClick, 
+      trackAdminAction: typeof trackAdminAction, 
+      trackPostCreated: typeof trackPostCreated 
+    });
+    
     try {
+      console.log('Testing trackPageView...');
       trackPageView('test_page', 'test_category');
+      
+      console.log('Testing trackCategorySwitch...');
       trackCategorySwitch('Lost', 'Found');
+      
+      console.log('Testing trackContactClick...');
       trackContactClick('whatsapp', 'test-post-123', 'Lost');
+      
+      console.log('Testing trackAdminAction...');
       trackAdminAction('login');
+      
+      console.log('Testing trackPostCreated...');
       trackPostCreated('Lost', true);
+      
       console.log('All analytics tests sent!');
     } catch (error) {
       console.error('Analytics test failed:', error);
