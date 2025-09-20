@@ -10,7 +10,9 @@ export const usePosts = () => {
   const [posts, setPosts] = useState<Post[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [examplePostsAdded, setExamplePostsAdded] = useState(false);
+  const [examplePostsAdded, setExamplePostsAdded] = useState(() => {
+    return localStorage.getItem('foundit_example_posts_added') === 'true';
+  });
   
   // Initialize admin state immediately
   const checkAdminStatus = () => {
@@ -62,11 +64,12 @@ export const usePosts = () => {
     // Wait for posts to load first, then check if we need examples
     if (loading || examplePostsAdded) return;
     
-    // Check if example posts already exist
-    const hasExamplePosts = posts.some(post => post.isAdminPost === true);
-    if (hasExamplePosts) {
+    // Check if example posts already exist (we expect 6 example posts)
+    const adminPosts = posts.filter(post => post.isAdminPost === true);
+    if (adminPosts.length >= 6) {
       console.log('Example posts already exist, skipping...');
       setExamplePostsAdded(true);
+      localStorage.setItem('foundit_example_posts_added', 'true');
       return;
     }
     
@@ -169,6 +172,7 @@ export const usePosts = () => {
       // Reload posts to show the examples
       await loadPosts();
       setExamplePostsAdded(true);
+      localStorage.setItem('foundit_example_posts_added', 'true');
     }
   };
 
