@@ -13,6 +13,20 @@ function App() {
   const [currentPage, setCurrentPage] = useState<'Home' | 'NewPost' | 'Lost' | 'Found' | 'ForSale'>('Home');
   const [activeCategory, setActiveCategory] = useState<'Lost' | 'Found' | 'For Sale/Services'>('Lost');
   
+  // Test analytics on app load
+  React.useEffect(() => {
+    console.log('Testing analytics...');
+    if (typeof window !== 'undefined' && window.va) {
+      console.log('Vercel Analytics is available!');
+      window.va('track', 'app_loaded', { 
+        timestamp: new Date().toISOString(),
+        test: true 
+      });
+    } else {
+      console.log('Vercel Analytics not yet available');
+    }
+  }, []);
+  
   console.log('About to call usePosts hook...');
   const {
     posts,

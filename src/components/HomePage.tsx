@@ -44,10 +44,26 @@ export const HomePage: React.FC<HomePageProps> = ({
   React.useEffect(() => {
     try {
       trackPageView('home', activeCategory);
+      console.log('Analytics: Page view tracked for home page');
     } catch (error) {
       console.warn('Analytics tracking failed:', error);
     }
   }, [activeCategory]);
+
+  // Test analytics function
+  const testAnalytics = () => {
+    console.log('Testing analytics manually...');
+    try {
+      trackPageView('test_page', 'test_category');
+      trackCategorySwitch('Lost', 'Found');
+      trackContactClick('whatsapp', 'test-post-123', 'Lost');
+      trackAdminAction('login');
+      trackPostCreated('Lost', true);
+      console.log('All analytics tests sent!');
+    } catch (error) {
+      console.error('Analytics test failed:', error);
+    }
+  };
 
   // Wrapper function for category changes with tracking
   const handleCategoryChange = (category: 'Lost' | 'Found' | 'For Sale/Services') => {
@@ -373,6 +389,13 @@ export const HomePage: React.FC<HomePageProps> = ({
                 title="Share"
               >
                 <Share2 className="w-6 h-6" />
+              </button>
+              <button
+                onClick={testAnalytics}
+                className="p-2 text-gray-600 hover:text-green-600 hover:bg-green-50 rounded-full transition-all duration-200"
+                title="Test Analytics"
+              >
+                📊
               </button>
             </div>
           </div>
