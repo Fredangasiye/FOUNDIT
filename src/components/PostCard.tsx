@@ -12,12 +12,39 @@ interface PostCardProps {
 export const PostCard: React.FC<PostCardProps> = ({ post, isSelected = false, onToggleSelection, showCheckbox = false }) => {
   const handleWhatsAppClick = () => {
     const message = encodeURIComponent(`Hi! I saw your post on FOUNDIT about "${post.title}".`);
-    const whatsappUrl = `https://wa.me/${post.contactWhatsApp || post.contactPhone}?text=${message}`;
+    
+    // Get the WhatsApp number, preferring contactWhatsApp over contactPhone
+    let whatsappNumber = post.contactWhatsApp || post.contactPhone;
+    
+    // Clean and format the phone number for WhatsApp
+    // Remove all non-digit characters
+    whatsappNumber = whatsappNumber.replace(/\D/g, '');
+    
+    // Add country code if not present (assuming South Africa +27)
+    if (whatsappNumber.startsWith('0')) {
+      whatsappNumber = '27' + whatsappNumber.substring(1);
+    } else if (!whatsappNumber.startsWith('27')) {
+      whatsappNumber = '27' + whatsappNumber;
+    }
+    
+    const whatsappUrl = `https://wa.me/${whatsappNumber}?text=${message}`;
     window.open(whatsappUrl, '_blank');
   };
 
   const handlePhoneClick = () => {
-    window.open(`tel:${post.contactPhone}`, '_self');
+    // Clean the phone number for tel: links
+    let phoneNumber = post.contactPhone.replace(/\D/g, '');
+    
+    // Add country code if not present (assuming South Africa +27)
+    if (phoneNumber.startsWith('0')) {
+      phoneNumber = '+27' + phoneNumber.substring(1);
+    } else if (!phoneNumber.startsWith('27')) {
+      phoneNumber = '+27' + phoneNumber;
+    } else {
+      phoneNumber = '+' + phoneNumber;
+    }
+    
+    window.open(`tel:${phoneNumber}`, '_self');
   };
 
   const handleEmailClick = () => {
