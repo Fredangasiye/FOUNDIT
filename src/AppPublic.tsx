@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { Analytics } from '@vercel/analytics/react';
+import { SpeedInsights } from '@vercel/speed-insights/react';
 import { HomePage } from './components/HomePage';
 import { NewPostPage } from './components/NewPostPage';
 import { LostPage } from './components/LostPage';
@@ -169,7 +170,8 @@ function App() {
   return (
     <>
       {renderPage()}
-      <Analytics mode="production" />
+      <Analytics />
+      <SpeedInsights />
     </>
   );
 }
