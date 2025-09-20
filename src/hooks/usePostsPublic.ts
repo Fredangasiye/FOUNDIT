@@ -10,6 +10,7 @@ export const usePosts = () => {
   const [posts, setPosts] = useState<Post[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [examplePostsAdded, setExamplePostsAdded] = useState(false);
   
   // Initialize admin state immediately
   const checkAdminStatus = () => {
@@ -48,12 +49,28 @@ export const usePosts = () => {
   // Load posts from Firebase on component mount
   useEffect(() => {
     loadPosts();
-    // Add example posts if none exist
-    addExamplePostsIfNeeded();
   }, []);
 
+  // Add example posts after posts are loaded
+  useEffect(() => {
+    if (!loading && posts.length === 0) {
+      addExamplePostsIfNeeded();
+    }
+  }, [loading, posts.length]);
+
   const addExamplePostsIfNeeded = async () => {
-    // Only add examples if there are no posts
+    // Wait for posts to load first, then check if we need examples
+    if (loading || examplePostsAdded) return;
+    
+    // Check if example posts already exist
+    const hasExamplePosts = posts.some(post => post.isAdminPost === true);
+    if (hasExamplePosts) {
+      console.log('Example posts already exist, skipping...');
+      setExamplePostsAdded(true);
+      return;
+    }
+    
+    // Only add examples if there are no posts at all
     if (posts.length === 0) {
       const examplePosts: CreatePostData[] = [
         {
@@ -151,6 +168,7 @@ export const usePosts = () => {
       
       // Reload posts to show the examples
       await loadPosts();
+      setExamplePostsAdded(true);
     }
   };
 
