@@ -9,7 +9,7 @@ import { ForSalePage } from './components/ForSalePage';
 import { usePosts } from './hooks/usePostsPublic';
 
 function App() {
-  console.log('App component initializing... v2.1');
+  console.log('App component initializing...');
   const [currentPage, setCurrentPage] = useState<'Home' | 'NewPost' | 'Lost' | 'Found' | 'ForSale'>('Home');
   const [activeCategory, setActiveCategory] = useState<'Lost' | 'Found' | 'For Sale/Services'>('Lost');
   
