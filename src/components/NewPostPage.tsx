@@ -162,7 +162,7 @@ export const NewPostPage: React.FC<NewPostPageProps> = ({ onCreatePost, onNaviga
 
 
   return (
-    <div className="min-h-screen bg-gray-800">
+    <div className="min-h-screen bg-gray-900">
       {/* Header */}
       <div className="bg-white shadow-sm border-b">
         <div className="max-w-4xl mx-auto px-4 py-4">
@@ -293,9 +293,11 @@ export const NewPostPage: React.FC<NewPostPageProps> = ({ onCreatePost, onNaviga
                     value="specific"
                     checked={formData.price !== undefined && formData.price !== -1}
                     onChange={() => setFormData(prev => ({ ...prev, price: undefined }))}
-                    className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 focus:ring-blue-500"
+                    className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 focus:ring-blue-500 focus:ring-2"
                   />
-                  <label htmlFor="price-specific" className="ml-2 text-sm text-gray-700">
+                  <label htmlFor="price-specific" className={`ml-2 text-sm font-medium ${
+                    formData.price !== undefined && formData.price !== -1 ? 'text-blue-600' : 'text-gray-700'
+                  }`}>
                     Set specific price
                   </label>
                 </div>
@@ -307,9 +309,11 @@ export const NewPostPage: React.FC<NewPostPageProps> = ({ onCreatePost, onNaviga
                     value="request"
                     checked={formData.price === -1}
                     onChange={() => setFormData(prev => ({ ...prev, price: -1 }))}
-                    className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 focus:ring-blue-500"
+                    className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 focus:ring-blue-500 focus:ring-2"
                   />
-                  <label htmlFor="price-request" className="ml-2 text-sm text-gray-700">
+                  <label htmlFor="price-request" className={`ml-2 text-sm font-medium ${
+                    formData.price === -1 ? 'text-blue-600' : 'text-gray-700'
+                  }`}>
                     Price on Request
                   </label>
                 </div>

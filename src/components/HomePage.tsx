@@ -304,7 +304,7 @@ export const HomePage: React.FC<HomePageProps> = ({
   };
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-gray-900">
       {/* Header Image */}
       <div className="relative h-48 overflow-hidden">
         {/* Background Image */}
@@ -329,11 +329,11 @@ export const HomePage: React.FC<HomePageProps> = ({
       </div>
 
       {/* Header */}
-      <div className="bg-white shadow-sm border-b">
+        <div className="bg-gray-800 shadow-sm border-b border-gray-700">
         <div className="max-w-4xl mx-auto px-4 py-4">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-gray-600">Community Posts</p>
+              <p className="text-gray-300">Community Posts</p>
             </div>
             <div className="flex items-center gap-3">
               {isAdmin ? (
@@ -384,27 +384,27 @@ export const HomePage: React.FC<HomePageProps> = ({
         </div>
       </div>
 
-      {/* Category Tabs */}
-      <div className="bg-white border-b">
-        <div className="max-w-4xl mx-auto px-4 py-4">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+      {/* Category Tabs - Horizontal and Sticky */}
+      <div className="sticky top-0 z-20 bg-gray-800 border-b border-gray-700">
+        <div className="max-w-4xl mx-auto px-4 py-2">
+          <div className="flex gap-2 overflow-x-auto">
             {categories.map((category) => (
               <button
                 key={category.name}
                 onClick={() => handleCategoryChange(category.name as 'Lost' | 'Found' | 'For Sale/Services')}
-                className={`relative p-4 rounded-lg border-2 transition-all duration-200 transform ${
+                className={`flex-shrink-0 px-4 py-2 rounded-lg border-2 transition-all duration-200 ${
                   activeCategory === category.name
-                    ? `${category.activeColor} border-transparent shadow-lg scale-105 ring-2 ring-blue-500 ring-opacity-50`
-                    : `${category.color} hover:shadow-md hover:scale-102`
+                    ? `${category.activeColor} border-transparent shadow-lg ring-2 ring-blue-500 ring-opacity-50`
+                    : `${category.color} hover:shadow-md`
                 }`}
               >
-                <div className="text-center">
-                  <div className={`font-semibold text-lg ${
+                <div className="text-center whitespace-nowrap">
+                  <div className={`font-semibold text-sm ${
                     activeCategory === category.name ? 'text-white' : ''
                   }`}>
                     {category.name}
                   </div>
-                  <div className={`text-sm ${
+                  <div className={`text-xs ${
                     activeCategory === category.name ? 'text-white opacity-90' : 'opacity-75'
                   }`}>
                     {getCategoryCount(category.name as 'Lost' | 'Found' | 'For Sale/Services')} posts
