@@ -37,7 +37,7 @@ const getDeviceFingerprint = () => {
   return Math.abs(hash).toString(36);
 };
 
-// Migration function to update old category names
+// Migration function to update old category names and remove example tags
 const migrateCategories = async () => {
   try {
     console.log('🔄 Starting category migration...');
@@ -51,29 +51,53 @@ const migrateCategories = async () => {
     
     if (querySnapshot.size === 0) {
       console.log('✅ No posts need migration');
-      return;
-    }
-    
-    console.log('📝 Posts to migrate:');
-    querySnapshot.docs.forEach((doc, index) => {
-      const data = doc.data();
-      console.log(`${index + 1}. ${data.title} (${data.category})`);
-    });
-    
-    const updatePromises = querySnapshot.docs.map(async (docSnapshot) => {
-      const postData = docSnapshot.data();
-      console.log(`🔄 Migrating post: ${postData.title}`);
-      
-      // Update the category to the new name
-      await updateDoc(doc(db, 'posts', docSnapshot.id), {
-        category: 'For Sale/Give away'
+    } else {
+      console.log('📝 Posts to migrate:');
+      querySnapshot.docs.forEach((doc, index) => {
+        const data = doc.data();
+        console.log(`${index + 1}. ${data.title} (${data.category})`);
       });
       
-      console.log(`✅ Migrated: ${postData.title}`);
+      const updatePromises = querySnapshot.docs.map(async (docSnapshot) => {
+        const postData = docSnapshot.data();
+        console.log(`🔄 Migrating post: ${postData.title}`);
+        
+        // Update the category to the new name
+        await updateDoc(doc(db, 'posts', docSnapshot.id), {
+          category: 'For Sale/Give away'
+        });
+        
+        console.log(`✅ Migrated: ${postData.title}`);
+      });
+      
+      await Promise.all(updatePromises);
+      console.log('🎉 Category migration completed successfully!');
+    }
+    
+    // Also remove example tags from specific posts
+    console.log('🔄 Removing example tags from official posts...');
+    
+    // Get all posts to check for example tags
+    const allPostsQuery = query(postsRef);
+    const allPostsSnapshot = await getDocs(allPostsQuery);
+    
+    const exampleTagRemovalPromises = allPostsSnapshot.docs.map(async (docSnapshot) => {
+      const postData = docSnapshot.data();
+      
+      // Remove example tag from Professional Photography Services
+      if (postData.title === 'Professional Photography Services' && postData.isAdminPost === true) {
+        console.log(`🔄 Removing example tag from: ${postData.title}`);
+        
+        await updateDoc(doc(db, 'posts', docSnapshot.id), {
+          isAdminPost: false
+        });
+        
+        console.log(`✅ Removed example tag from: ${postData.title}`);
+      }
     });
     
-    await Promise.all(updatePromises);
-    console.log('🎉 Migration completed successfully!');
+    await Promise.all(exampleTagRemovalPromises);
+    console.log('🎉 Example tag removal completed!');
     
   } catch (error) {
     console.error('❌ Migration failed:', error);
