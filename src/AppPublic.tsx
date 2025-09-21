@@ -11,7 +11,7 @@ import { usePosts } from './hooks/usePostsPublic';
 function App() {
   console.log('App component initializing...');
   const [currentPage, setCurrentPage] = useState<'Home' | 'NewPost' | 'Lost' | 'Found' | 'ForSale'>('Home');
-  const [activeCategory, setActiveCategory] = useState<'Lost' | 'Found' | 'For Sale/Services'>('Lost');
+  const [activeCategory, setActiveCategory] = useState<'Lost' | 'Found' | 'Give away'>('Lost');
   
   // Test analytics on app load
   React.useEffect(() => {
@@ -146,7 +146,7 @@ function App() {
       case 'ForSale':
         return (
           <ForSalePage
-            posts={getFilteredPosts('For Sale/Services')}
+            posts={getFilteredPosts('Give away')}
             onNavigate={navigate}
             loading={postsLoading}
             isAdmin={isAdmin}

@@ -13,12 +13,12 @@ export interface Post {
   id: string;
   title: string;
   description: string;
-  category: 'Lost' | 'Found' | 'For Sale/Services';
+  category: 'Lost' | 'Found' | 'Give away';
   image: string;
   imagePath?: string; // Firebase Storage path for permanent file storage
-  price?: number; // Price in RANDS for For Sale/Services posts
-  website?: string; // Website URL for For Sale/Services posts
-  socialMedia?: string; // Social media link for For Sale/Services posts
+  price?: number; // Price in RANDS for Give away posts
+  website?: string; // Website URL for Give away posts
+  socialMedia?: string; // Social media link for Give away posts
   datePosted: Date;
   // Contact Information
   contactName: string;

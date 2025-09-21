@@ -7,7 +7,7 @@ interface NewPostPageProps {
   onCreatePost: (postData: {
     title: string;
     description: string;
-    category: 'Lost' | 'Found' | 'For Sale/Services';
+    category: 'Lost' | 'Found' | 'Give away';
     image: string;
     imagePath?: string;
     price?: number;
@@ -26,7 +26,7 @@ export const NewPostPage: React.FC<NewPostPageProps> = ({ onCreatePost, onNaviga
   const [formData, setFormData] = useState({
     title: '',
     description: '',
-    category: 'Lost' as 'Lost' | 'Found' | 'For Sale/Services',
+    category: 'Lost' as 'Lost' | 'Found' | 'Give away',
     image: '',
     imagePath: '',
     price: undefined as number | undefined,
@@ -164,16 +164,16 @@ export const NewPostPage: React.FC<NewPostPageProps> = ({ onCreatePost, onNaviga
   return (
     <div className="min-h-screen bg-gray-900">
       {/* Header */}
-      <div className="bg-white shadow-sm border-b">
+      <div className="bg-gray-800 shadow-sm border-b border-gray-700">
         <div className="max-w-4xl mx-auto px-4 py-4">
           <div className="flex items-center gap-4">
             <button
               onClick={() => onNavigate('Home')}
-              className="p-2 text-gray-600 hover:text-blue-600 hover:bg-blue-50 rounded-full transition-all duration-200"
+              className="p-2 text-gray-400 hover:text-blue-400 hover:bg-gray-700 rounded-full transition-all duration-200"
             >
               <ArrowLeft className="w-6 h-6" />
             </button>
-            <h1 className="text-2xl font-bold text-gray-900">Create New Post</h1>
+            <h1 className="text-2xl font-bold text-gray-100">Create New Post</h1>
           </div>
         </div>
       </div>
@@ -205,13 +205,13 @@ export const NewPostPage: React.FC<NewPostPageProps> = ({ onCreatePost, onNaviga
             <select
               id="category"
               value={formData.category}
-              onChange={(e) => setFormData(prev => ({ ...prev, category: e.target.value as 'Lost' | 'Found' | 'For Sale/Services' }))}
+              onChange={(e) => setFormData(prev => ({ ...prev, category: e.target.value as 'Lost' | 'Found' | 'Give away' }))}
               className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
               required
             >
               <option value="Lost">Lost</option>
               <option value="Found">Found</option>
-              <option value="For Sale/Services">For Sale/Services</option>
+              <option value="Give away">Give away</option>
             </select>
           </div>
 
@@ -278,8 +278,8 @@ export const NewPostPage: React.FC<NewPostPageProps> = ({ onCreatePost, onNaviga
             )}
           </div>
 
-          {/* Price (for For Sale/Services) */}
-          {formData.category === 'For Sale/Services' && (
+          {/* Price (for Give away) */}
+          {formData.category === 'Give away' && (
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-3">
                 Pricing
@@ -334,8 +334,8 @@ export const NewPostPage: React.FC<NewPostPageProps> = ({ onCreatePost, onNaviga
             </div>
           )}
 
-          {/* Website (for For Sale/Services) */}
-          {formData.category === 'For Sale/Services' && (
+          {/* Website (for Give away) */}
+          {formData.category === 'Give away' && (
             <div>
               <label htmlFor="website" className="block text-sm font-medium text-gray-700 mb-2">
                 Website URL
@@ -361,8 +361,8 @@ export const NewPostPage: React.FC<NewPostPageProps> = ({ onCreatePost, onNaviga
             </div>
           )}
 
-          {/* Facebook Marketplace Link (for For Sale/Services) */}
-          {formData.category === 'For Sale/Services' && (
+          {/* Facebook Marketplace Link (for Give away) */}
+          {formData.category === 'Give away' && (
             <div>
               <label htmlFor="socialMedia" className="block text-sm font-medium text-gray-700 mb-2">
                 Facebook Marketplace Link (Optional)

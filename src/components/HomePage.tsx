@@ -7,8 +7,8 @@ import { uploadImage } from '../services/firestoreService';
 
 interface HomePageProps {
   posts: Post[];
-  activeCategory: 'Lost' | 'Found' | 'For Sale/Services';
-  onCategoryChange: (category: 'Lost' | 'Found' | 'For Sale/Services') => void;
+  activeCategory: 'Lost' | 'Found' | 'Give away';
+  onCategoryChange: (category: 'Lost' | 'Found' | 'Give away') => void;
   onNavigate: (page: 'NewPost' | 'Lost' | 'Found' | 'ForSale') => void;
   loading?: boolean;
   isAdmin?: boolean;
@@ -52,7 +52,7 @@ export const HomePage: React.FC<HomePageProps> = ({
 
 
   // Wrapper function for category changes with tracking
-  const handleCategoryChange = (category: 'Lost' | 'Found' | 'For Sale/Services') => {
+  const handleCategoryChange = (category: 'Lost' | 'Found' | 'Give away') => {
     try {
       trackCategorySwitch(activeCategory, category);
     } catch (error) {
@@ -86,7 +86,7 @@ export const HomePage: React.FC<HomePageProps> = ({
   const categories = [
     { name: 'Lost', color: 'bg-red-100 text-red-800 border-red-200', activeColor: 'bg-red-500 text-white' },
     { name: 'Found', color: 'bg-green-100 text-green-800 border-green-200', activeColor: 'bg-green-500 text-white' },
-    { name: 'For Sale/Services', color: 'bg-blue-100 text-blue-800 border-blue-200', activeColor: 'bg-blue-500 text-white' }
+    { name: 'Give away', color: 'bg-blue-100 text-blue-800 border-blue-200', activeColor: 'bg-blue-500 text-white' }
   ];
 
   const handleAdminLogin = () => {
@@ -188,7 +188,7 @@ export const HomePage: React.FC<HomePageProps> = ({
       const updatedData: any = {
         title: editFormData.title,
         description: editFormData.description,
-        category: editFormData.category as 'Lost' | 'Found' | 'For Sale/Services',
+        category: editFormData.category as 'Lost' | 'Found' | 'Give away',
         contactName: editFormData.contactName,
         contactPhone: editFormData.contactPhone,
         unitNumber: editFormData.unitNumber,
@@ -254,7 +254,7 @@ export const HomePage: React.FC<HomePageProps> = ({
     });
   };
 
-  const getCategoryCount = (category: 'Lost' | 'Found' | 'For Sale/Services') => {
+  const getCategoryCount = (category: 'Lost' | 'Found' | 'Give away') => {
     return posts.filter(post => post.category === category).length;
   };
 
@@ -328,78 +328,78 @@ export const HomePage: React.FC<HomePageProps> = ({
         <div className="absolute top-1/2 left-1/3 w-8 h-8 bg-white/20 rounded-full blur-sm"></div>
       </div>
 
-      {/* Header */}
-        <div className="bg-gray-800 shadow-sm border-b border-gray-700">
-        <div className="max-w-4xl mx-auto px-4 py-4">
+      {/* Header - Mobile First */}
+      <div className="bg-gray-800 shadow-sm border-b border-gray-700">
+        <div className="w-full px-2 py-3">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-gray-300">Community Posts</p>
+              <p className="text-gray-300 text-sm sm:text-base font-medium">Community Posts</p>
             </div>
-            <div className="flex items-center gap-3">
+            <div className="flex items-center gap-1 sm:gap-2">
               {isAdmin ? (
                 <>
-                  <span className="text-sm text-green-600 font-medium flex items-center gap-1">
-                    <Shield className="w-4 h-4" />
-                    Admin
+                  <span className="text-xs sm:text-sm text-green-400 font-medium flex items-center gap-1">
+                    <Shield className="w-3 h-3 sm:w-4 sm:h-4" />
+                    <span className="hidden sm:inline">Admin</span>
                   </span>
                   <button
                     onClick={toggleBulkMode}
-                    className={`p-2 rounded-full transition-all duration-200 ${
+                    className={`p-1.5 sm:p-2 rounded-full transition-all duration-200 ${
                       bulkMode 
-                        ? 'text-blue-600 bg-blue-100' 
-                        : 'text-gray-600 hover:text-blue-600 hover:bg-blue-50'
+                        ? 'text-blue-400 bg-blue-900' 
+                        : 'text-gray-400 hover:text-blue-400 hover:bg-gray-700'
                     }`}
                     title={bulkMode ? "Exit Bulk Mode" : "Bulk Delete Mode"}
                   >
-                    <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <svg className="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
                     </svg>
                   </button>
                   <button
                     onClick={onAdminLogout}
-                    className="p-2 text-gray-600 hover:text-red-600 hover:bg-red-50 rounded-full transition-all duration-200"
+                    className="p-1.5 sm:p-2 text-gray-400 hover:text-red-400 hover:bg-gray-700 rounded-full transition-all duration-200"
                     title="Logout Admin"
                   >
-                    <LogOut className="w-6 h-6" />
+                    <LogOut className="w-4 h-4 sm:w-5 sm:h-5" />
                   </button>
                 </>
               ) : (
                 <button
                   onClick={() => setShowAdminLogin(true)}
-                  className="p-2 text-gray-600 hover:text-blue-600 hover:bg-blue-50 rounded-full transition-all duration-200"
+                  className="p-1.5 sm:p-2 text-gray-400 hover:text-blue-400 hover:bg-gray-700 rounded-full transition-all duration-200"
                   title="Admin Login"
                 >
-                  <LogIn className="w-6 h-6" />
+                  <LogIn className="w-4 h-4 sm:w-5 sm:h-5" />
                 </button>
               )}
               <button
                 onClick={handleShare}
-                className="p-2 text-gray-600 hover:text-blue-600 hover:bg-blue-50 rounded-full transition-all duration-200"
+                className="p-1.5 sm:p-2 text-gray-400 hover:text-blue-400 hover:bg-gray-700 rounded-full transition-all duration-200"
                 title="Share"
               >
-                <Share2 className="w-6 h-6" />
+                <Share2 className="w-4 h-4 sm:w-5 sm:h-5" />
               </button>
             </div>
           </div>
         </div>
       </div>
 
-      {/* Category Tabs - Horizontal and Sticky */}
+      {/* Category Tabs - Mobile First, Full Width */}
       <div className="sticky top-0 z-20 bg-gray-800 border-b border-gray-700">
-        <div className="max-w-4xl mx-auto px-4 py-2">
-          <div className="flex gap-2 overflow-x-auto">
+        <div className="w-full px-2 py-2">
+          <div className="grid grid-cols-3 gap-2">
             {categories.map((category) => (
               <button
                 key={category.name}
-                onClick={() => handleCategoryChange(category.name as 'Lost' | 'Found' | 'For Sale/Services')}
-                className={`flex-shrink-0 px-4 py-2 rounded-lg border-2 transition-all duration-200 ${
+                onClick={() => handleCategoryChange(category.name as 'Lost' | 'Found' | 'Give away')}
+                className={`px-2 py-3 rounded-lg border-2 transition-all duration-200 ${
                   activeCategory === category.name
                     ? `${category.activeColor} border-transparent shadow-lg ring-2 ring-blue-500 ring-opacity-50`
                     : `${category.color} hover:shadow-md`
                 }`}
               >
-                <div className="text-center whitespace-nowrap">
-                  <div className={`font-semibold text-sm ${
+                <div className="text-center">
+                  <div className={`font-semibold text-xs sm:text-sm ${
                     activeCategory === category.name ? 'text-white' : ''
                   }`}>
                     {category.name}
@@ -407,7 +407,7 @@ export const HomePage: React.FC<HomePageProps> = ({
                   <div className={`text-xs ${
                     activeCategory === category.name ? 'text-white opacity-90' : 'opacity-75'
                   }`}>
-                    {getCategoryCount(category.name as 'Lost' | 'Found' | 'For Sale/Services')} posts
+                    {getCategoryCount(category.name as 'Lost' | 'Found' | 'Give away')} posts
                   </div>
                 </div>
               </button>
@@ -433,13 +433,13 @@ export const HomePage: React.FC<HomePageProps> = ({
         {loading ? (
           <div className="text-center py-12">
             <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
-            <p className="text-gray-600">Loading posts...</p>
+            <p className="text-gray-300">Loading posts...</p>
           </div>
         ) : filteredPosts.length === 0 ? (
           <div className="text-center py-12">
             <MessageCircle className="w-16 h-16 text-gray-300 mx-auto mb-4" />
-            <h3 className="text-lg font-semibold text-gray-900 mb-2">No posts yet</h3>
-            <p className="text-gray-600 mb-4">Be the first to create a post in the {activeCategory} category!</p>
+            <h3 className="text-lg font-semibold text-gray-100 mb-2">No posts yet</h3>
+            <p className="text-gray-300 mb-4">Be the first to create a post in the {activeCategory} category!</p>
             <button
               onClick={() => onNavigate('NewPost')}
               className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors duration-200"
@@ -716,12 +716,12 @@ export const HomePage: React.FC<HomePageProps> = ({
                   <option value="">Select category</option>
                   <option value="Lost">Lost</option>
                   <option value="Found">Found</option>
-                  <option value="For Sale/Services">For Sale/Services</option>
+                  <option value="Give away">Give away</option>
                 </select>
               </div>
 
-              {/* Price (only for For Sale/Services) */}
-              {editFormData.category === 'For Sale/Services' && (
+              {/* Price (only for Give away) */}
+              {editFormData.category === 'Give away' && (
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
                     Price (R)
@@ -801,8 +801,8 @@ export const HomePage: React.FC<HomePageProps> = ({
                 </div>
               </div>
 
-              {/* Website and Social Media (only for For Sale/Services) */}
-              {editFormData.category === 'For Sale/Services' && (
+              {/* Website and Social Media (only for Give away) */}
+              {editFormData.category === 'Give away' && (
                 <>
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-2">
