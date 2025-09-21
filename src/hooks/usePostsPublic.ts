@@ -40,23 +40,29 @@ const getDeviceFingerprint = () => {
 // Migration function to update old category names
 const migrateCategories = async () => {
   try {
-    console.log('Starting category migration...');
+    console.log('🔄 Starting category migration...');
     
     // Get all posts with the old category name
     const postsRef = collection(db, 'posts');
     const q = query(postsRef, where('category', '==', 'For Sale/Services'));
     const querySnapshot = await getDocs(q);
     
-    console.log(`Found ${querySnapshot.size} posts to migrate`);
+    console.log(`📊 Found ${querySnapshot.size} posts to migrate`);
     
     if (querySnapshot.size === 0) {
-      console.log('No posts need migration');
+      console.log('✅ No posts need migration');
       return;
     }
     
+    console.log('📝 Posts to migrate:');
+    querySnapshot.docs.forEach((doc, index) => {
+      const data = doc.data();
+      console.log(`${index + 1}. ${data.title} (${data.category})`);
+    });
+    
     const updatePromises = querySnapshot.docs.map(async (docSnapshot) => {
       const postData = docSnapshot.data();
-      console.log(`Migrating post: ${postData.title}`);
+      console.log(`🔄 Migrating post: ${postData.title}`);
       
       // Update the category to the new name
       await updateDoc(doc(db, 'posts', docSnapshot.id), {
@@ -67,7 +73,7 @@ const migrateCategories = async () => {
     });
     
     await Promise.all(updatePromises);
-    console.log('✅ Migration completed successfully!');
+    console.log('🎉 Migration completed successfully!');
     
   } catch (error) {
     console.error('❌ Migration failed:', error);
@@ -267,6 +273,8 @@ export const usePosts = () => {
       await migrateCategories();
       
       const fetchedPosts = await getPosts();
+      console.log('📋 Loaded posts:', fetchedPosts.length);
+      console.log('📋 Post categories:', fetchedPosts.map(p => `${p.title}: ${p.category}`));
       setPosts(fetchedPosts);
     } catch (error: any) {
       console.error('Error loading posts:', error);
