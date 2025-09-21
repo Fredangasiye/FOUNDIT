@@ -1,5 +1,5 @@
 import React from 'react';
-import { MessageCircle, Calendar, MapPin, DollarSign, Globe, Share2 } from 'lucide-react';
+import { MessageCircle, Calendar, MapPin, Globe, Share2 } from 'lucide-react';
 import { Post } from '../types';
 // import { trackContactClick } from '../utils/analytics';
 
@@ -150,10 +150,14 @@ export const PostCard: React.FC<PostCardProps> = ({ post, isSelected = false, on
         <div className="flex items-start justify-between mb-4">
           <div className="flex-1">
             <h3 className="text-xl font-bold text-gray-900 mb-2 leading-tight">{post.title}</h3>
-            {post.price && (
+            {post.price && post.price > 0 && (
               <div className="flex items-center gap-1 mb-3">
-                <DollarSign className="w-5 h-5 text-green-600" />
                 <span className="text-xl font-bold text-green-600">R{post.price.toFixed(2)}</span>
+              </div>
+            )}
+            {post.price === -1 && (
+              <div className="flex items-center gap-1 mb-3">
+                <span className="text-xl font-bold text-gray-600 italic">Price on Request</span>
               </div>
             )}
             <div className="flex items-center gap-4 text-sm text-gray-600">

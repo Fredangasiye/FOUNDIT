@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { MessageCircle, Calendar, MapPin, DollarSign, Globe, Share2, Phone, Mail, User, Building } from 'lucide-react';
+import { MessageCircle, Calendar, MapPin, Globe, Share2, Phone, Mail, User, Building } from 'lucide-react';
 import { Post } from '../types';
 // import { trackContactClick } from '../utils/analytics';
 import { getOptimizedImageUrl } from '../services/imageService';
@@ -204,11 +204,17 @@ export const OptimizedPostCard: React.FC<PostCardProps> = ({ post }) => {
         </p>
 
         {/* Price (for For Sale/Services) */}
-        {post.category === 'For Sale/Services' && post.price && (
+        {post.category === 'For Sale/Services' && post.price && post.price > 0 && (
           <div className="flex items-center gap-2 mb-4">
-            <DollarSign className="w-5 h-5 text-green-600" />
             <span className="text-lg font-semibold text-green-600">
               R{post.price.toLocaleString()}
+            </span>
+          </div>
+        )}
+        {post.category === 'For Sale/Services' && post.price === -1 && (
+          <div className="flex items-center gap-2 mb-4">
+            <span className="text-lg font-semibold text-gray-600 italic">
+              Price on Request
             </span>
           </div>
         )}

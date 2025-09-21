@@ -86,8 +86,11 @@ export const NewPostPage: React.FC<NewPostPageProps> = ({ onCreatePost, onNaviga
     };
 
     // Only include optional fields if they have values
-    if (formData.price && formData.price > 0) {
+    if (formData.price !== undefined && formData.price > 0) {
       postData.price = formData.price;
+    } else if (formData.price === -1) {
+      // Price on Request - we'll handle this in the display logic
+      postData.price = -1;
     }
     if (formData.contactEmail && formData.contactEmail.trim() !== '') {
       postData.contactEmail = formData.contactEmail;
@@ -157,14 +160,9 @@ export const NewPostPage: React.FC<NewPostPageProps> = ({ onCreatePost, onNaviga
     setFormData(prev => ({ ...prev, image: '', imagePath: '' }));
   };
 
-  const categories = [
-    { value: 'Lost', label: 'Lost', color: 'bg-red-100 text-red-800 border-red-200' },
-    { value: 'Found', label: 'Found', color: 'bg-green-100 text-green-800 border-green-200' },
-    { value: 'For Sale/Services', label: 'For Sale/Services', color: 'bg-blue-100 text-blue-800 border-blue-200' }
-  ];
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-gray-800">
       {/* Header */}
       <div className="bg-white shadow-sm border-b">
         <div className="max-w-4xl mx-auto px-4 py-4">
@@ -201,27 +199,20 @@ export const NewPostPage: React.FC<NewPostPageProps> = ({ onCreatePost, onNaviga
 
           {/* Category */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
+            <label htmlFor="category" className="block text-sm font-medium text-gray-700 mb-2">
               Category *
             </label>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
-              {categories.map((category) => (
-                <button
-                  key={category.value}
-                  type="button"
-                  onClick={() => setFormData(prev => ({ ...prev, category: category.value as 'Lost' | 'Found' | 'For Sale/Services' }))}
-                  className={`relative p-4 rounded-lg border-2 transition-all duration-200 transform ${
-                    formData.category === category.value
-                      ? `${category.color} border-transparent shadow-lg scale-105 ring-2 ring-blue-500 ring-opacity-50`
-                      : `${category.color} hover:shadow-md hover:scale-102`
-                  }`}
-                >
-                  <div className="text-center font-semibold">
-                    {category.label}
-                  </div>
-                </button>
-              ))}
-            </div>
+            <select
+              id="category"
+              value={formData.category}
+              onChange={(e) => setFormData(prev => ({ ...prev, category: e.target.value as 'Lost' | 'Found' | 'For Sale/Services' }))}
+              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
+              required
+            >
+              <option value="Lost">Lost</option>
+              <option value="Found">Found</option>
+              <option value="For Sale/Services">For Sale/Services</option>
+            </select>
           </div>
 
           {/* Description */}
@@ -290,18 +281,52 @@ export const NewPostPage: React.FC<NewPostPageProps> = ({ onCreatePost, onNaviga
           {/* Price (for For Sale/Services) */}
           {formData.category === 'For Sale/Services' && (
             <div>
-              <label htmlFor="price" className="block text-sm font-medium text-gray-700 mb-2">
-                Price (R)
+              <label className="block text-sm font-medium text-gray-700 mb-3">
+                Pricing
               </label>
-              <input
-                id="price"
-                type="number"
-                value={formData.price || ''}
-                onChange={(e) => setFormData(prev => ({ ...prev, price: e.target.value ? Number(e.target.value) : undefined }))}
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
-                placeholder="Enter price in Rands"
-                min="0"
-              />
+              <div className="space-y-3">
+                <div className="flex items-center">
+                  <input
+                    id="price-specific"
+                    type="radio"
+                    name="priceType"
+                    value="specific"
+                    checked={formData.price !== undefined && formData.price !== -1}
+                    onChange={() => setFormData(prev => ({ ...prev, price: undefined }))}
+                    className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 focus:ring-blue-500"
+                  />
+                  <label htmlFor="price-specific" className="ml-2 text-sm text-gray-700">
+                    Set specific price
+                  </label>
+                </div>
+                <div className="flex items-center">
+                  <input
+                    id="price-request"
+                    type="radio"
+                    name="priceType"
+                    value="request"
+                    checked={formData.price === -1}
+                    onChange={() => setFormData(prev => ({ ...prev, price: -1 }))}
+                    className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 focus:ring-blue-500"
+                  />
+                  <label htmlFor="price-request" className="ml-2 text-sm text-gray-700">
+                    Price on Request
+                  </label>
+                </div>
+              </div>
+              {formData.price !== -1 && (
+                <div className="mt-3">
+                  <input
+                    id="price"
+                    type="number"
+                    value={formData.price || ''}
+                    onChange={(e) => setFormData(prev => ({ ...prev, price: e.target.value ? Number(e.target.value) : undefined }))}
+                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
+                    placeholder="Enter price in Rands"
+                    min="0"
+                  />
+                </div>
+              )}
             </div>
           )}
 
