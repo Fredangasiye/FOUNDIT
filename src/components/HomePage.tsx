@@ -314,7 +314,7 @@ export const HomePage: React.FC<HomePageProps> = ({
   return (
     <div className="min-h-screen bg-gray-900">
       {/* Header Image */}
-      <div className="relative h-48 overflow-hidden">
+                <div className="relative h-40 sm:h-48 overflow-hidden w-full">
         {/* Background Image */}
         <img 
           src="/header-image-01.jpg" 
@@ -702,7 +702,7 @@ export const HomePage: React.FC<HomePageProps> = ({
                     <img 
                       src={imagePreview || editFormData.image} 
                       alt="Preview" 
-                      className="w-full h-32 object-cover rounded-lg border border-gray-200"
+                      className="w-full h-32 sm:h-40 object-cover rounded-lg border border-gray-200"
                       onError={(e) => {
                         e.currentTarget.style.display = 'none';
                       }}

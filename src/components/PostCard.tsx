@@ -122,7 +122,7 @@ export const PostCard: React.FC<PostCardProps> = ({ post, isSelected = false, on
       )}
       {/* Image */}
       {post.image && (
-        <div className="h-48 bg-gradient-to-br from-gray-50 to-gray-100 overflow-hidden relative flex items-center justify-center group">
+        <div className="h-40 sm:h-48 bg-gradient-to-br from-gray-50 to-gray-100 overflow-hidden relative flex items-center justify-center group w-full">
           <img
             src={post.image}
             alt={post.title}

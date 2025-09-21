@@ -146,7 +146,7 @@ export const OptimizedPostCard: React.FC<PostCardProps> = ({ post }) => {
     >
       {/* Image Section with Lazy Loading */}
       {post.image && isVisible && (
-        <div className="relative h-48 bg-gradient-to-br from-gray-50 to-gray-100 flex items-center justify-center group">
+        <div className="relative h-40 sm:h-48 bg-gradient-to-br from-gray-50 to-gray-100 flex items-center justify-center group w-full">
           {!imageLoaded && (
             <div className="absolute inset-0 flex items-center justify-center">
               <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
