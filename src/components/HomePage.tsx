@@ -319,7 +319,7 @@ export const HomePage: React.FC<HomePageProps> = ({
         <img 
           src="/header-image-01.jpg" 
           alt="Community Header" 
-          className="w-full h-full object-cover"
+          className="w-full h-full object-contain sm:object-cover"
         />
         {/* Overlay */}
         <div className="absolute inset-0 bg-black bg-opacity-40"></div>
