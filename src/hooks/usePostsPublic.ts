@@ -3,7 +3,7 @@ import { createPost, getPosts, getPostsByCategory, deletePost as firestoreDelete
 // import { trackAdminAction, trackBulkOperation } from '../utils/analytics';
 import { Post, CreatePostData } from '../types';
 import { db } from '../config/firebase';
-import { collection, getDocs, updateDoc, query, where } from 'firebase/firestore';
+import { collection, getDocs, updateDoc, query, where, doc } from 'firebase/firestore';
 
 // Admin configuration - change this to your details
 const ADMIN_EMAIL = 'fred@foundit.com'; // Change this to your email
