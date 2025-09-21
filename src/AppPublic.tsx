@@ -11,7 +11,7 @@ import { usePosts } from './hooks/usePostsPublic';
 function App() {
   console.log('App component initializing...');
   const [currentPage, setCurrentPage] = useState<'Home' | 'NewPost' | 'Lost' | 'Found' | 'ForSale'>('Home');
-  const [activeCategory, setActiveCategory] = useState<'Lost' | 'Found' | 'For Sale/Give away'>('Lost');
+  const [activeCategory, setActiveCategory] = useState<'Lost' | 'Found' | 'For Sale/Give away'>('For Sale/Give away');
   
   // Test analytics on app load
   React.useEffect(() => {
