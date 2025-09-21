@@ -120,7 +120,7 @@ export const OptimizedPostCard: React.FC<PostCardProps> = ({ post }) => {
         return 'bg-red-100 text-red-800 border-red-200';
       case 'Found':
         return 'bg-green-100 text-green-800 border-green-200';
-      case 'Give away':
+      case 'For Sale/Give away':
         return 'bg-blue-100 text-blue-800 border-blue-200';
       default:
         return 'bg-gray-100 text-gray-800 border-gray-200';
@@ -203,15 +203,15 @@ export const OptimizedPostCard: React.FC<PostCardProps> = ({ post }) => {
           {post.description}
         </p>
 
-        {/* Price (for Give away) */}
-        {post.category === 'Give away' && post.price && post.price > 0 && (
+        {/* Price (for For Sale/Give away) */}
+        {post.category === 'For Sale/Give away' && post.price && post.price > 0 && (
           <div className="flex items-center gap-2 mb-4">
             <span className="text-lg font-semibold text-green-600">
               R{post.price.toLocaleString()}
             </span>
           </div>
         )}
-        {post.category === 'Give away' && post.price === -1 && (
+        {post.category === 'For Sale/Give away' && post.price === -1 && (
           <div className="flex items-center gap-2 mb-4">
             <span className="text-lg font-semibold text-gray-600 italic">
               Price on Request
@@ -219,8 +219,8 @@ export const OptimizedPostCard: React.FC<PostCardProps> = ({ post }) => {
           </div>
         )}
 
-        {/* Website Link (for Give away) */}
-        {post.category === 'Give away' && post.website && (
+        {/* Website Link (for For Sale/Give away) */}
+        {post.category === 'For Sale/Give away' && post.website && (
           <div className="mb-4">
             <a
               href={post.website}
@@ -234,8 +234,8 @@ export const OptimizedPostCard: React.FC<PostCardProps> = ({ post }) => {
           </div>
         )}
 
-        {/* Facebook Marketplace Link (for Give away) */}
-        {post.category === 'Give away' && post.socialMedia && (
+        {/* Facebook Marketplace Link (for For Sale/Give away) */}
+        {post.category === 'For Sale/Give away' && post.socialMedia && (
           <div className="mb-4">
             <a
               href={post.socialMedia}

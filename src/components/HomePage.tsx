@@ -7,8 +7,8 @@ import { uploadImage } from '../services/firestoreService';
 
 interface HomePageProps {
   posts: Post[];
-  activeCategory: 'Lost' | 'Found' | 'Give away';
-  onCategoryChange: (category: 'Lost' | 'Found' | 'Give away') => void;
+  activeCategory: 'Lost' | 'Found' | 'For Sale/Give away';
+  onCategoryChange: (category: 'Lost' | 'Found' | 'For Sale/Give away') => void;
   onNavigate: (page: 'NewPost' | 'Lost' | 'Found' | 'ForSale') => void;
   loading?: boolean;
   isAdmin?: boolean;
@@ -52,7 +52,7 @@ export const HomePage: React.FC<HomePageProps> = ({
 
 
   // Wrapper function for category changes with tracking
-  const handleCategoryChange = (category: 'Lost' | 'Found' | 'Give away') => {
+  const handleCategoryChange = (category: 'Lost' | 'Found' | 'For Sale/Give away') => {
     try {
       trackCategorySwitch(activeCategory, category);
     } catch (error) {
@@ -86,7 +86,7 @@ export const HomePage: React.FC<HomePageProps> = ({
   const categories = [
     { name: 'Lost', color: 'bg-red-100 text-red-800 border-red-200', activeColor: 'bg-red-500 text-white' },
     { name: 'Found', color: 'bg-green-100 text-green-800 border-green-200', activeColor: 'bg-green-500 text-white' },
-    { name: 'Give away', color: 'bg-blue-100 text-blue-800 border-blue-200', activeColor: 'bg-blue-500 text-white' }
+    { name: 'For Sale/Give away', color: 'bg-blue-100 text-blue-800 border-blue-200', activeColor: 'bg-blue-500 text-white' }
   ];
 
   const handleAdminLogin = () => {
@@ -188,7 +188,7 @@ export const HomePage: React.FC<HomePageProps> = ({
       const updatedData: any = {
         title: editFormData.title,
         description: editFormData.description,
-        category: editFormData.category as 'Lost' | 'Found' | 'Give away',
+        category: editFormData.category as 'Lost' | 'Found' | 'For Sale/Give away',
         contactName: editFormData.contactName,
         contactPhone: editFormData.contactPhone,
         unitNumber: editFormData.unitNumber,
@@ -254,7 +254,7 @@ export const HomePage: React.FC<HomePageProps> = ({
     });
   };
 
-  const getCategoryCount = (category: 'Lost' | 'Found' | 'Give away') => {
+  const getCategoryCount = (category: 'Lost' | 'Found' | 'For Sale/Give away') => {
     return posts.filter(post => post.category === category).length;
   };
 
@@ -391,7 +391,7 @@ export const HomePage: React.FC<HomePageProps> = ({
             {categories.map((category) => (
               <button
                 key={category.name}
-                onClick={() => handleCategoryChange(category.name as 'Lost' | 'Found' | 'Give away')}
+                onClick={() => handleCategoryChange(category.name as 'Lost' | 'Found' | 'For Sale/Give away')}
                 className={`px-2 py-3 rounded-lg border-2 transition-all duration-200 ${
                   activeCategory === category.name
                     ? `${category.activeColor} border-transparent shadow-lg ring-2 ring-blue-500 ring-opacity-50`
@@ -407,7 +407,7 @@ export const HomePage: React.FC<HomePageProps> = ({
                   <div className={`text-xs ${
                     activeCategory === category.name ? 'text-white opacity-90' : 'opacity-75'
                   }`}>
-                    {getCategoryCount(category.name as 'Lost' | 'Found' | 'Give away')} posts
+                    {getCategoryCount(category.name as 'Lost' | 'Found' | 'For Sale/Give away')} posts
                   </div>
                 </div>
               </button>
@@ -716,12 +716,12 @@ export const HomePage: React.FC<HomePageProps> = ({
                   <option value="">Select category</option>
                   <option value="Lost">Lost</option>
                   <option value="Found">Found</option>
-                  <option value="Give away">Give away</option>
+                  <option value="For Sale/Give away">For Sale/Give away</option>
                 </select>
               </div>
 
-              {/* Price (only for Give away) */}
-              {editFormData.category === 'Give away' && (
+              {/* Price (only for For Sale/Give away) */}
+              {editFormData.category === 'For Sale/Give away' && (
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
                     Price (R)
@@ -801,8 +801,8 @@ export const HomePage: React.FC<HomePageProps> = ({
                 </div>
               </div>
 
-              {/* Website and Social Media (only for Give away) */}
-              {editFormData.category === 'Give away' && (
+              {/* Website and Social Media (only for For Sale/Give away) */}
+              {editFormData.category === 'For Sale/Give away' && (
                 <>
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-2">

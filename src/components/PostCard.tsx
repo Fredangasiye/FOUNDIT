@@ -98,7 +98,7 @@ export const PostCard: React.FC<PostCardProps> = ({ post, isSelected = false, on
         return 'bg-red-100 text-red-800 border-red-200';
       case 'Found':
         return 'bg-green-100 text-green-800 border-green-200';
-      case 'Give away':
+      case 'For Sale/Give away':
         return 'bg-blue-100 text-blue-800 border-blue-200';
       default:
         return 'bg-gray-100 text-gray-800 border-gray-200';
@@ -179,8 +179,8 @@ export const PostCard: React.FC<PostCardProps> = ({ post, isSelected = false, on
         {/* Description */}
         <p className="text-gray-700 mb-4 leading-relaxed">{post.description}</p>
 
-        {/* Website and Social Media Links (only for Give away) */}
-        {post.category === 'Give away' && (post.website || post.socialMedia) && (
+        {/* Website and Social Media Links (only for For Sale/Give away) */}
+        {post.category === 'For Sale/Give away' && (post.website || post.socialMedia) && (
           <div className="flex flex-wrap gap-3 mb-4">
             {post.website && (
               <a

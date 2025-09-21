@@ -7,7 +7,7 @@ interface NewPostPageProps {
   onCreatePost: (postData: {
     title: string;
     description: string;
-    category: 'Lost' | 'Found' | 'Give away';
+    category: 'Lost' | 'Found' | 'For Sale/Give away';
     image: string;
     imagePath?: string;
     price?: number;
@@ -26,7 +26,7 @@ export const NewPostPage: React.FC<NewPostPageProps> = ({ onCreatePost, onNaviga
   const [formData, setFormData] = useState({
     title: '',
     description: '',
-    category: 'Lost' as 'Lost' | 'Found' | 'Give away',
+    category: 'Lost' as 'Lost' | 'Found' | 'For Sale/Give away',
     image: '',
     imagePath: '',
     price: undefined as number | undefined,
@@ -205,13 +205,13 @@ export const NewPostPage: React.FC<NewPostPageProps> = ({ onCreatePost, onNaviga
             <select
               id="category"
               value={formData.category}
-              onChange={(e) => setFormData(prev => ({ ...prev, category: e.target.value as 'Lost' | 'Found' | 'Give away' }))}
+              onChange={(e) => setFormData(prev => ({ ...prev, category: e.target.value as 'Lost' | 'Found' | 'For Sale/Give away' }))}
               className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
               required
             >
               <option value="Lost">Lost</option>
               <option value="Found">Found</option>
-              <option value="Give away">Give away</option>
+              <option value="For Sale/Give away">For Sale/Give away</option>
             </select>
           </div>
 
@@ -278,8 +278,8 @@ export const NewPostPage: React.FC<NewPostPageProps> = ({ onCreatePost, onNaviga
             )}
           </div>
 
-          {/* Price (for Give away) */}
-          {formData.category === 'Give away' && (
+          {/* Price (for For Sale/Give away) */}
+          {formData.category === 'For Sale/Give away' && (
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-3">
                 Pricing
@@ -334,8 +334,8 @@ export const NewPostPage: React.FC<NewPostPageProps> = ({ onCreatePost, onNaviga
             </div>
           )}
 
-          {/* Website (for Give away) */}
-          {formData.category === 'Give away' && (
+          {/* Website (for For Sale/Give away) */}
+          {formData.category === 'For Sale/Give away' && (
             <div>
               <label htmlFor="website" className="block text-sm font-medium text-gray-700 mb-2">
                 Website URL
@@ -361,8 +361,8 @@ export const NewPostPage: React.FC<NewPostPageProps> = ({ onCreatePost, onNaviga
             </div>
           )}
 
-          {/* Facebook Marketplace Link (for Give away) */}
-          {formData.category === 'Give away' && (
+          {/* Facebook Marketplace Link (for For Sale/Give away) */}
+          {formData.category === 'For Sale/Give away' && (
             <div>
               <label htmlFor="socialMedia" className="block text-sm font-medium text-gray-700 mb-2">
                 Facebook Marketplace Link (Optional)
