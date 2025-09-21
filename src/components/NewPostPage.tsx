@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
 import { ArrowLeft, Upload, X, Send, Globe, Share2 } from 'lucide-react';
-import { uploadImage, validateImageFile } from '../services/imageService';
+import { uploadImage } from '../services/imageService';
 // import { trackPostCreated, trackImageUpload } from '../utils/analytics';
+import { compressImage, validateImageFile } from '../utils/imageCompression';
 
 interface NewPostPageProps {
   onCreatePost: (postData: {
@@ -28,7 +29,9 @@ export const NewPostPage: React.FC<NewPostPageProps> = ({ onCreatePost, onNaviga
     description: '',
     category: 'Lost' as 'Lost' | 'Found' | 'For Sale/Give away',
     image: '',
+    image2: '',
     imagePath: '',
+    imagePath2: '',
     price: undefined as number | undefined,
     isNegotiable: false,
     website: '',
@@ -41,6 +44,9 @@ export const NewPostPage: React.FC<NewPostPageProps> = ({ onCreatePost, onNaviga
   });
   const [loading, setLoading] = useState(false);
   const [syncWhatsApp, setSyncWhatsApp] = useState(false);
+  const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
+  const [imagePreviews, setImagePreviews] = useState<string[]>([]);
+  const [isCompressing, setIsCompressing] = useState(false);
 
   // Auto-sync WhatsApp number when phone number changes and sync is enabled
   React.useEffect(() => {
@@ -83,8 +89,15 @@ export const NewPostPage: React.FC<NewPostPageProps> = ({ onCreatePost, onNaviga
       contactPhone: formData.contactPhone,
       contactWhatsApp: formData.contactWhatsApp,
       unitNumber: formData.unitNumber,
-      image: formData.image
+      image: formData.image,
+      imagePath: formData.imagePath
     };
+
+    // Add second image for For Sale/Give away posts
+    if (formData.category === 'For Sale/Give away' && formData.image2) {
+      postData.image2 = formData.image2;
+      postData.imagePath2 = formData.imagePath2;
+    }
 
     // Only include optional fields if they have values
     if (formData.price !== undefined && formData.price > 0) {
@@ -116,52 +129,106 @@ export const NewPostPage: React.FC<NewPostPageProps> = ({ onCreatePost, onNaviga
   };
 
   const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
+    const files = Array.from(e.target.files || []);
+    if (files.length === 0) return;
 
-    // Validate file before upload
-    const validation = validateImageFile(file);
-    if (!validation.valid) {
-      alert(validation.error);
+    // Limit to 2 images for For Sale/Give away, 1 for others
+    const maxImages = formData.category === 'For Sale/Give away' ? 2 : 1;
+    if (files.length > maxImages) {
+      alert(`Please select maximum ${maxImages} image(s) for ${formData.category} posts`);
       return;
     }
 
-    setLoading(true);
-    try {
-      // Generate a temporary user ID for upload (will be replaced with actual user ID in production)
-      const tempUserId = 'temp_user_' + Date.now();
-      const result = await uploadImage(file, tempUserId);
-      
-      if (result.success) {
-        setFormData(prev => ({ 
-          ...prev, 
-          image: result.url,
-          imagePath: result.path
-        }));
-        console.log('Image uploaded successfully:', result.url);
-        // trackImageUpload(true, file.size);
-      } else {
-        // Still set the image (fallback) but show warning
-        setFormData(prev => ({ 
-          ...prev, 
-          image: result.url,
-          imagePath: result.path
-        }));
-        console.warn('Image upload failed, using fallback:', result.error);
-        alert('Image upload failed, but you can still create the post. The image will show a placeholder.');
-        // trackImageUpload(false, file.size);
+    // Validate all files
+    for (const file of files) {
+      const validation = validateImageFile(file);
+      if (!validation.valid) {
+        alert(validation.error);
+        return;
       }
+    }
+
+    setIsCompressing(true);
+    setLoading(true);
+    
+    try {
+      const compressedFiles: File[] = [];
+      
+      // Compress all images
+      for (const file of files) {
+        console.log('🖼️ Compressing image:', file.name);
+        const compressedFile = await compressImage(file);
+        compressedFiles.push(compressedFile);
+      }
+
+      setSelectedFiles(compressedFiles);
+      
+      // Create previews
+      const previews: string[] = [];
+      for (const file of compressedFiles) {
+        const preview = URL.createObjectURL(file);
+        previews.push(preview);
+      }
+      setImagePreviews(previews);
+
+      // Upload images
+      const tempUserId = 'temp_user_' + Date.now();
+      const uploadPromises = compressedFiles.map((file, index) => 
+        uploadImage(file, `${tempUserId}_${index}`)
+      );
+      
+      const results = await Promise.all(uploadPromises);
+      
+      // Update form data with uploaded images
+      const imageUrls = results.map(result => result.url);
+      const imagePaths = results.map(result => result.path);
+      
+      setFormData(prev => ({
+        ...prev,
+        image: imageUrls[0] || '',
+        imagePath: imagePaths[0] || '',
+        image2: imageUrls[1] || '',
+        imagePath2: imagePaths[1] || ''
+      }));
+
+      console.log('✅ Images uploaded successfully:', imageUrls);
+      // trackImageUpload(true, compressedFiles.reduce((sum, file) => sum + file.size, 0));
+      
     } catch (error) {
-      console.error("Image upload error:", error);
-      alert("Failed to upload image. Please try again.");
-      // trackImageUpload(false, file.size);
+      console.error('Error uploading images:', error);
+      alert('Error uploading images. Please try again.');
     } finally {
+      setIsCompressing(false);
       setLoading(false);
     }
   };
 
-  const removeImage = () => {
-    setFormData(prev => ({ ...prev, image: '', imagePath: '' }));
+  const removeImage = (index: number = 0) => {
+    if (index === 0) {
+      setFormData(prev => ({ 
+        ...prev, 
+        image: formData.image2 || '', 
+        imagePath: formData.imagePath2 || '',
+        image2: '', 
+        imagePath2: '' 
+      }));
+    } else {
+      setFormData(prev => ({ 
+        ...prev, 
+        image2: '', 
+        imagePath2: '' 
+      }));
+    }
+    
+    // Update previews
+    const newPreviews = [...imagePreviews];
+    newPreviews.splice(index, 1);
+    setImagePreviews(newPreviews);
+    
+    // Update selected files
+    const newFiles = [...selectedFiles];
+    newFiles.splice(index, 1);
+    setSelectedFiles(newFiles);
   };
 
 
@@ -238,46 +305,64 @@ export const NewPostPage: React.FC<NewPostPageProps> = ({ onCreatePost, onNaviga
           {/* Image Upload */}
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
-              Image (Optional)
+              {formData.category === 'For Sale/Give away' ? 'Images (Optional - up to 2)' : 'Image (Optional)'}
             </label>
-            {formData.image ? (
-              <div className="relative">
-                <img
-                  src={formData.image}
-                  alt="Preview"
-                  className="w-full h-48 object-cover rounded-lg"
-                />
-                <button
-                  type="button"
-                  onClick={removeImage}
-                  className="absolute top-2 right-2 p-1 bg-red-500 text-white rounded-full hover:bg-red-600 transition-colors duration-200"
-                >
-                  <X className="w-4 h-4" />
-                </button>
+            
+            {/* Image Previews */}
+            {imagePreviews.length > 0 && (
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
+                {imagePreviews.map((preview, index) => (
+                  <div key={index} className="relative">
+                    <img
+                      src={preview}
+                      alt={`Preview ${index + 1}`}
+                      className="w-full h-48 object-cover rounded-lg"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => removeImage(index)}
+                      className="absolute top-2 right-2 p-1 bg-red-500 text-white rounded-full hover:bg-red-600 transition-colors duration-200"
+                    >
+                      <X className="w-4 h-4" />
+                    </button>
+                  </div>
+                ))}
               </div>
-            ) : (
+            )}
+            
+            {/* Upload Area */}
+            {imagePreviews.length < (formData.category === 'For Sale/Give away' ? 2 : 1) && (
               <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center">
                 <Upload className="w-8 h-8 text-gray-400 mx-auto mb-2" />
-                <p className="text-gray-600 mb-2">Upload an image to your post</p>
+                <p className="text-gray-600 mb-2">
+                  {formData.category === 'For Sale/Give away' 
+                    ? `Upload up to 2 images (${imagePreviews.length}/2)`
+                    : 'Upload an image to your post'
+                  }
+                </p>
                 <input
                   type="file"
                   accept="image/*"
+                  multiple={formData.category === 'For Sale/Give away'}
                   onChange={handleImageUpload}
                   className="hidden"
                   id="image-upload"
-                  disabled={loading}
+                  disabled={loading || isCompressing}
                 />
                 <label
                   htmlFor="image-upload"
                   className={`inline-flex items-center px-4 py-2 rounded-lg transition-colors duration-200 cursor-pointer ${
-                    loading 
+                    loading || isCompressing
                       ? 'bg-gray-400 text-white cursor-not-allowed' 
                       : 'bg-blue-600 text-white hover:bg-blue-700'
                   }`}
                 >
                   <Upload className="w-4 h-4 mr-2" />
-                  {loading ? 'Uploading...' : 'Choose Image'}
+                  {isCompressing ? 'Compressing...' : loading ? 'Uploading...' : 'Choose Image(s)'}
                 </label>
+                {isCompressing && (
+                  <p className="text-sm text-gray-500 mt-2">Optimizing images for faster loading...</p>
+                )}
               </div>
             )}
           </div>

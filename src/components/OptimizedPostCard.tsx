@@ -210,7 +210,7 @@ export const OptimizedPostCard: React.FC<PostCardProps> = ({ post }) => {
               R{post.price.toLocaleString()}
             </span>
             {post.isNegotiable && (
-              <span className="text-sm text-gray-500 italic">(Negotiable)</span>
+              <span className="text-sm text-blue-600 font-medium">neg</span>
             )}
           </div>
         )}

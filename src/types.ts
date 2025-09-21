@@ -15,7 +15,9 @@ export interface Post {
   description: string;
   category: 'Lost' | 'Found' | 'For Sale/Give away';
   image: string;
+  image2?: string; // Second image for For Sale/Give away posts
   imagePath?: string; // Firebase Storage path for permanent file storage
+  imagePath2?: string; // Firebase Storage path for second image
   price?: number; // Price in RANDS for For Sale/Give away posts
   isNegotiable?: boolean; // Whether price is negotiable for For Sale/Give away posts
   website?: string; // Website URL for For Sale/Give away posts
