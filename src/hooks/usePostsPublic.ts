@@ -2,6 +2,8 @@ import { useState, useEffect } from 'react';
 import { createPost, getPosts, getPostsByCategory, deletePost as firestoreDeletePost, updatePost } from '../services/firestoreService';
 // import { trackAdminAction, trackBulkOperation } from '../utils/analytics';
 import { Post, CreatePostData } from '../types';
+import { db } from '../config/firebase';
+import { collection, getDocs, updateDoc, query, where } from 'firebase/firestore';
 
 // Admin configuration - change this to your details
 const ADMIN_EMAIL = 'fred@foundit.com'; // Change this to your email
@@ -33,6 +35,43 @@ const getDeviceFingerprint = () => {
     hash = hash & hash; // Convert to 32-bit integer
   }
   return Math.abs(hash).toString(36);
+};
+
+// Migration function to update old category names
+const migrateCategories = async () => {
+  try {
+    console.log('Starting category migration...');
+    
+    // Get all posts with the old category name
+    const postsRef = collection(db, 'posts');
+    const q = query(postsRef, where('category', '==', 'For Sale/Services'));
+    const querySnapshot = await getDocs(q);
+    
+    console.log(`Found ${querySnapshot.size} posts to migrate`);
+    
+    if (querySnapshot.size === 0) {
+      console.log('No posts need migration');
+      return;
+    }
+    
+    const updatePromises = querySnapshot.docs.map(async (docSnapshot) => {
+      const postData = docSnapshot.data();
+      console.log(`Migrating post: ${postData.title}`);
+      
+      // Update the category to the new name
+      await updateDoc(doc(db, 'posts', docSnapshot.id), {
+        category: 'For Sale/Give away'
+      });
+      
+      console.log(`✅ Migrated: ${postData.title}`);
+    });
+    
+    await Promise.all(updatePromises);
+    console.log('✅ Migration completed successfully!');
+    
+  } catch (error) {
+    console.error('❌ Migration failed:', error);
+  }
 };
 
 export const usePosts = () => {
@@ -146,7 +185,7 @@ export const usePosts = () => {
         {
           title: "Professional Photography Services",
           description: "Offering professional photography services for events, portraits, and real estate. 10+ years experience with high-quality equipment. Specializing in family portraits, corporate events, and property photography. Competitive rates and flexible scheduling available.",
-          category: "For Sale/Services" as const,
+          category: "For Sale/Give away" as const,
           price: 500,
           contactName: "David Wilson",
           contactPhone: "0845678901",
@@ -185,7 +224,7 @@ export const usePosts = () => {
         {
           title: "Home Tutoring - Mathematics & Science",
           description: "Experienced tutor offering mathematics and science tutoring for high school students. Bachelor's degree in Engineering with 5+ years teaching experience. Available evenings and weekends. Can help with exam preparation and homework assistance.",
-          category: "For Sale/Services" as const,
+          category: "For Sale/Give away" as const,
           price: 200,
           contactName: "Dr. James Miller",
           contactPhone: "0878901234",
@@ -224,6 +263,9 @@ export const usePosts = () => {
     setError(null);
     
     try {
+      // Run migration first to update old category names
+      await migrateCategories();
+      
       const fetchedPosts = await getPosts();
       setPosts(fetchedPosts);
     } catch (error: any) {
