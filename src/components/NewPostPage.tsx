@@ -30,6 +30,7 @@ export const NewPostPage: React.FC<NewPostPageProps> = ({ onCreatePost, onNaviga
     image: '',
     imagePath: '',
     price: undefined as number | undefined,
+    isNegotiable: false,
     website: '',
     socialMedia: '',
     contactName: '',
@@ -91,6 +92,9 @@ export const NewPostPage: React.FC<NewPostPageProps> = ({ onCreatePost, onNaviga
     } else if (formData.price === -1) {
       // Price on Request - we'll handle this in the display logic
       postData.price = -1;
+    }
+    if (formData.isNegotiable) {
+      postData.isNegotiable = formData.isNegotiable;
     }
     if (formData.contactEmail && formData.contactEmail.trim() !== '') {
       postData.contactEmail = formData.contactEmail;
@@ -291,12 +295,12 @@ export const NewPostPage: React.FC<NewPostPageProps> = ({ onCreatePost, onNaviga
                     type="radio"
                     name="priceType"
                     value="specific"
-                    checked={formData.price !== undefined && formData.price !== -1}
-                    onChange={() => setFormData(prev => ({ ...prev, price: undefined }))}
+                    checked={formData.price !== -1}
+                    onChange={() => setFormData(prev => ({ ...prev, price: undefined, isNegotiable: false }))}
                     className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 focus:ring-blue-500 focus:ring-2"
                   />
                   <label htmlFor="price-specific" className={`ml-2 text-sm font-medium ${
-                    formData.price !== undefined && formData.price !== -1 ? 'text-blue-600' : 'text-gray-700'
+                    formData.price !== -1 ? 'text-blue-600' : 'text-gray-700'
                   }`}>
                     Set specific price
                   </label>
@@ -308,7 +312,7 @@ export const NewPostPage: React.FC<NewPostPageProps> = ({ onCreatePost, onNaviga
                     name="priceType"
                     value="request"
                     checked={formData.price === -1}
-                    onChange={() => setFormData(prev => ({ ...prev, price: -1 }))}
+                    onChange={() => setFormData(prev => ({ ...prev, price: -1, isNegotiable: false }))}
                     className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 focus:ring-blue-500 focus:ring-2"
                   />
                   <label htmlFor="price-request" className={`ml-2 text-sm font-medium ${
@@ -319,7 +323,7 @@ export const NewPostPage: React.FC<NewPostPageProps> = ({ onCreatePost, onNaviga
                 </div>
               </div>
               {formData.price !== -1 && (
-                <div className="mt-3">
+                <div className="mt-3 space-y-3">
                   <input
                     id="price"
                     type="number"
@@ -329,6 +333,18 @@ export const NewPostPage: React.FC<NewPostPageProps> = ({ onCreatePost, onNaviga
                     placeholder="Enter price in Rands"
                     min="0"
                   />
+                  <div className="flex items-center">
+                    <input
+                      id="negotiable"
+                      type="checkbox"
+                      checked={formData.isNegotiable}
+                      onChange={(e) => setFormData(prev => ({ ...prev, isNegotiable: e.target.checked }))}
+                      className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 focus:ring-2"
+                    />
+                    <label htmlFor="negotiable" className="ml-2 text-sm font-medium text-gray-700">
+                      Price is negotiable
+                    </label>
+                  </div>
                 </div>
               )}
             </div>

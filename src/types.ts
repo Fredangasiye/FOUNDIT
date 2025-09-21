@@ -17,6 +17,7 @@ export interface Post {
   image: string;
   imagePath?: string; // Firebase Storage path for permanent file storage
   price?: number; // Price in RANDS for For Sale/Give away posts
+  isNegotiable?: boolean; // Whether price is negotiable for For Sale/Give away posts
   website?: string; // Website URL for For Sale/Give away posts
   socialMedia?: string; // Social media link for For Sale/Give away posts
   datePosted: Date;

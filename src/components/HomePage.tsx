@@ -70,6 +70,7 @@ export const HomePage: React.FC<HomePageProps> = ({
     description: '',
     category: '',
     price: '',
+    isNegotiable: false,
     contactName: '',
     contactPhone: '',
     contactEmail: '',
@@ -122,6 +123,7 @@ export const HomePage: React.FC<HomePageProps> = ({
         description: post.description,
         category: post.category,
         price: post.price ? post.price.toString() : '',
+        isNegotiable: post.isNegotiable || false,
         contactName: post.contactName,
         contactPhone: post.contactPhone,
         contactEmail: post.contactEmail,
@@ -200,7 +202,12 @@ export const HomePage: React.FC<HomePageProps> = ({
         const priceValue = parseFloat(editFormData.price);
         if (!isNaN(priceValue) && priceValue > 0) {
           updatedData.price = priceValue;
+        } else if (editFormData.price === '-1') {
+          updatedData.price = -1;
         }
+      }
+      if (editFormData.isNegotiable) {
+        updatedData.isNegotiable = editFormData.isNegotiable;
       }
       if (editFormData.contactEmail && editFormData.contactEmail.trim() !== '') {
         updatedData.contactEmail = editFormData.contactEmail;
@@ -243,6 +250,7 @@ export const HomePage: React.FC<HomePageProps> = ({
       description: '',
       category: '',
       price: '',
+      isNegotiable: false,
       contactName: '',
       contactPhone: '',
       contactEmail: '',
@@ -723,17 +731,68 @@ export const HomePage: React.FC<HomePageProps> = ({
               {/* Price (only for For Sale/Give away) */}
               {editFormData.category === 'For Sale/Give away' && (
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Price (R)
+                  <label className="block text-sm font-medium text-gray-700 mb-3">
+                    Pricing
                   </label>
-                  <input
-                    type="number"
-                    step="0.01"
-                    value={editFormData.price}
-                    onChange={(e) => setEditFormData({...editFormData, price: e.target.value})}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                    placeholder="0.00"
-                  />
+                  <div className="space-y-3">
+                    <div className="flex items-center">
+                      <input
+                        id="edit-price-specific"
+                        type="radio"
+                        name="editPriceType"
+                        value="specific"
+                        checked={editFormData.price !== '' && editFormData.price !== '-1'}
+                        onChange={() => setEditFormData({...editFormData, price: '', isNegotiable: false})}
+                        className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 focus:ring-blue-500 focus:ring-2"
+                      />
+                      <label htmlFor="edit-price-specific" className={`ml-2 text-sm font-medium ${
+                        editFormData.price !== '' && editFormData.price !== '-1' ? 'text-blue-600' : 'text-gray-700'
+                      }`}>
+                        Set specific price
+                      </label>
+                    </div>
+                    <div className="flex items-center">
+                      <input
+                        id="edit-price-request"
+                        type="radio"
+                        name="editPriceType"
+                        value="request"
+                        checked={editFormData.price === '-1'}
+                        onChange={() => setEditFormData({...editFormData, price: '-1', isNegotiable: false})}
+                        className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 focus:ring-blue-500 focus:ring-2"
+                      />
+                      <label htmlFor="edit-price-request" className={`ml-2 text-sm font-medium ${
+                        editFormData.price === '-1' ? 'text-blue-600' : 'text-gray-700'
+                      }`}>
+                        Price on Request
+                      </label>
+                    </div>
+                  </div>
+                  {editFormData.price !== '-1' && (
+                    <div className="mt-3 space-y-3">
+                      <input
+                        type="number"
+                        step="0.01"
+                        value={editFormData.price}
+                        onChange={(e) => setEditFormData({...editFormData, price: e.target.value})}
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                        placeholder="Enter price in Rands"
+                        min="0"
+                      />
+                      <div className="flex items-center">
+                        <input
+                          id="edit-negotiable"
+                          type="checkbox"
+                          checked={editFormData.isNegotiable}
+                          onChange={(e) => setEditFormData({...editFormData, isNegotiable: e.target.checked})}
+                          className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 focus:ring-2"
+                        />
+                        <label htmlFor="edit-negotiable" className="ml-2 text-sm font-medium text-gray-700">
+                          Price is negotiable
+                        </label>
+                      </div>
+                    </div>
+                  )}
                 </div>
               )}
 
