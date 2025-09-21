@@ -74,30 +74,28 @@ const migrateCategories = async () => {
       console.log('🎉 Category migration completed successfully!');
     }
     
-    // Also remove example tags from specific posts
-    console.log('🔄 Removing example tags from official posts...');
-    
-    // Get all posts to check for example tags
-    const allPostsQuery = query(postsRef);
-    const allPostsSnapshot = await getDocs(allPostsQuery);
-    
-    const exampleTagRemovalPromises = allPostsSnapshot.docs.map(async (docSnapshot) => {
-      const postData = docSnapshot.data();
-      
-      // Remove example tag from Professional Photography Services
-      if (postData.title === 'Professional Photography Services' && postData.isAdminPost === true) {
-        console.log(`🔄 Removing example tag from: ${postData.title}`);
-        
-        await updateDoc(doc(db, 'posts', docSnapshot.id), {
-          isAdminPost: false
-        });
-        
-        console.log(`✅ Removed example tag from: ${postData.title}`);
-      }
-    });
-    
-    await Promise.all(exampleTagRemovalPromises);
-    console.log('🎉 Example tag removal completed!');
+    // Also check for the specific "Professional Photography Services" post and remove its example tag
+    // Removed the 'where('isAdminPost', '==', true)' condition to make it more robust
+    const photographyPostQuery = query(postsRef, where('title', '==', 'Professional Photography Services'));
+    const photographyPostSnapshot = await getDocs(photographyPostQuery);
+
+    if (photographyPostSnapshot.size > 0) {
+      console.log(`📝 Found ${photographyPostSnapshot.size} "Professional Photography Services" posts to ensure EXAMPLE tag is removed.`);
+      photographyPostSnapshot.docs.forEach(async (docSnapshot) => {
+        const postData = docSnapshot.data();
+        if (postData.isAdminPost !== false) { // Only update if it's not already false
+          console.log(`🔄 Setting isAdminPost to false for: ${postData.title}`);
+          await updateDoc(doc(db, 'posts', docSnapshot.id), {
+            isAdminPost: false,
+          });
+          console.log(`✅ Ensured EXAMPLE tag is removed from: ${postData.title}`);
+        } else {
+          console.log(`☑️ "Professional Photography Services" post already has isAdminPost: false.`);
+        }
+      });
+    } else {
+      console.log('✅ "Professional Photography Services" post not found or does not need example tag removal.');
+    }
     
   } catch (error) {
     console.error('❌ Migration failed:', error);
