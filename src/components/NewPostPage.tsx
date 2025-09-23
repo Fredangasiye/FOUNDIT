@@ -8,7 +8,7 @@ interface NewPostPageProps {
   onCreatePost: (postData: {
     title: string;
     description: string;
-    category: 'Lost' | 'Found' | 'For Sale/Give away';
+    category: 'Lost' | 'Found' | 'For Sale/Give away' | 'EVENTS';
     image: string;
     imagePath?: string;
     price?: number;
@@ -19,6 +19,10 @@ interface NewPostPageProps {
     contactWhatsApp: string;
     contactEmail: string;
     unitNumber: string;
+    eventDate?: string;
+    eventTime?: string;
+    eventLocation?: string;
+    eventLink?: string;
   }) => void;
   onNavigate: (page: 'Home') => void;
 }
@@ -27,7 +31,7 @@ export const NewPostPage: React.FC<NewPostPageProps> = ({ onCreatePost, onNaviga
   const [formData, setFormData] = useState({
     title: '',
     description: '',
-    category: 'Lost' as 'Lost' | 'Found' | 'For Sale/Give away',
+    category: 'Lost' as 'Lost' | 'Found' | 'For Sale/Give away' | 'EVENTS',
     image: '',
     image2: '',
     imagePath: '',
@@ -40,7 +44,11 @@ export const NewPostPage: React.FC<NewPostPageProps> = ({ onCreatePost, onNaviga
     contactPhone: '',
     contactWhatsApp: '',
     contactEmail: '',
-    unitNumber: ''
+    unitNumber: '',
+    eventDate: '',
+    eventTime: '',
+    eventLocation: '',
+    eventLink: ''
   });
   const [loading, setLoading] = useState(false);
   const [syncWhatsApp, setSyncWhatsApp] = useState(false);
@@ -117,6 +125,22 @@ export const NewPostPage: React.FC<NewPostPageProps> = ({ onCreatePost, onNaviga
     }
     if (formData.socialMedia && formData.socialMedia.trim() !== '') {
       postData.socialMedia = formData.socialMedia;
+    }
+    
+    // Add event-specific fields for EVENTS category
+    if (formData.category === 'EVENTS') {
+      if (formData.eventDate && formData.eventDate.trim() !== '') {
+        postData.eventDate = formData.eventDate;
+      }
+      if (formData.eventTime && formData.eventTime.trim() !== '') {
+        postData.eventTime = formData.eventTime;
+      }
+      if (formData.eventLocation && formData.eventLocation.trim() !== '') {
+        postData.eventLocation = formData.eventLocation;
+      }
+      if (formData.eventLink && formData.eventLink.trim() !== '') {
+        postData.eventLink = formData.eventLink;
+      }
     }
     
     await new Promise(resolve => setTimeout(resolve, 500));
@@ -276,13 +300,14 @@ export const NewPostPage: React.FC<NewPostPageProps> = ({ onCreatePost, onNaviga
             <select
               id="category"
               value={formData.category}
-              onChange={(e) => setFormData(prev => ({ ...prev, category: e.target.value as 'Lost' | 'Found' | 'For Sale/Give away' }))}
+              onChange={(e) => setFormData(prev => ({ ...prev, category: e.target.value as 'Lost' | 'Found' | 'For Sale/Give away' | 'EVENTS' }))}
               className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
               required
             >
               <option value="Lost">Lost</option>
               <option value="Found">Found</option>
               <option value="For Sale/Give away">For Sale/Give away</option>
+              <option value="EVENTS">Events & Meetings</option>
             </select>
           </div>
 
@@ -485,6 +510,88 @@ export const NewPostPage: React.FC<NewPostPageProps> = ({ onCreatePost, onNaviga
                   className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
                   placeholder="facebook.com/marketplace/item/..."
                 />
+              </div>
+            </div>
+          )}
+
+          {/* Event Information Section - Only show for EVENTS category */}
+          {formData.category === 'EVENTS' && (
+            <div className="border-t pt-6">
+              <h3 className="text-lg font-semibold text-gray-900 mb-4">Event Details</h3>
+              
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+                {/* Event Date */}
+                <div>
+                  <label htmlFor="eventDate" className="block text-sm font-medium text-gray-700 mb-2">
+                    Event Date
+                  </label>
+                  <input
+                    type="date"
+                    id="eventDate"
+                    value={formData.eventDate}
+                    onChange={(e) => setFormData(prev => ({ ...prev, eventDate: e.target.value }))}
+                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all duration-200"
+                  />
+                </div>
+
+                {/* Event Time */}
+                <div>
+                  <label htmlFor="eventTime" className="block text-sm font-medium text-gray-700 mb-2">
+                    Event Time
+                  </label>
+                  <input
+                    type="time"
+                    id="eventTime"
+                    value={formData.eventTime}
+                    onChange={(e) => setFormData(prev => ({ ...prev, eventTime: e.target.value }))}
+                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all duration-200"
+                  />
+                </div>
+
+                {/* Event Location */}
+                <div>
+                  <label htmlFor="eventLocation" className="block text-sm font-medium text-gray-700 mb-2">
+                    Event Location
+                  </label>
+                  <input
+                    type="text"
+                    id="eventLocation"
+                    value={formData.eventLocation}
+                    onChange={(e) => setFormData(prev => ({ ...prev, eventLocation: e.target.value }))}
+                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all duration-200"
+                    placeholder="e.g., Community Center, Church Hall"
+                  />
+                </div>
+              </div>
+
+              {/* Event Link */}
+              <div>
+                <label htmlFor="eventLink" className="block text-sm font-medium text-gray-700 mb-2">
+                  Event/Meeting Link
+                </label>
+                <div className="relative">
+                  <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                    <Globe className="h-5 w-5 text-purple-500" />
+                  </div>
+                  <input
+                    type="url"
+                    id="eventLink"
+                    value={formData.eventLink}
+                    onChange={(e) => {
+                      let value = e.target.value;
+                      // Auto-add https:// if not present
+                      if (value && !value.match(/^https?:\/\//)) {
+                        value = `https://${value}`;
+                      }
+                      setFormData(prev => ({ ...prev, eventLink: value }));
+                    }}
+                    className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all duration-200"
+                    placeholder="https://zoom.us/j/123456789 or https://eventbrite.com/..."
+                  />
+                </div>
+                <p className="mt-1 text-sm text-gray-500">
+                  For online events, Zoom meetings, or event registration pages
+                </p>
               </div>
             </div>
           )}

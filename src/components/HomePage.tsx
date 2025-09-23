@@ -7,9 +7,9 @@ import { uploadImage } from '../services/firestoreService';
 
 interface HomePageProps {
   posts: Post[];
-  activeCategory: 'Lost' | 'Found' | 'For Sale/Give away';
-  onCategoryChange: (category: 'Lost' | 'Found' | 'For Sale/Give away') => void;
-  onNavigate: (page: 'NewPost' | 'Lost' | 'Found' | 'ForSale') => void;
+  activeCategory: 'Lost' | 'Found' | 'For Sale/Give away' | 'EVENTS';
+  onCategoryChange: (category: 'Lost' | 'Found' | 'For Sale/Give away' | 'EVENTS') => void;
+  onNavigate: (page: 'NewPost' | 'Lost' | 'Found' | 'ForSale' | 'Events') => void;
   loading?: boolean;
   isAdmin?: boolean;
   onAdminLogin?: (email: string, phone: string) => boolean;
@@ -52,7 +52,7 @@ export const HomePage: React.FC<HomePageProps> = ({
 
 
   // Wrapper function for category changes with tracking
-  const handleCategoryChange = (category: 'Lost' | 'Found' | 'For Sale/Give away') => {
+  const handleCategoryChange = (category: 'Lost' | 'Found' | 'For Sale/Give away' | 'EVENTS') => {
     try {
       trackCategorySwitch(activeCategory, category);
     } catch (error) {
@@ -87,7 +87,8 @@ export const HomePage: React.FC<HomePageProps> = ({
   const categories = [
     { name: 'Lost', color: 'bg-red-100 text-red-800 border-red-200', activeColor: 'bg-red-500 text-white' },
     { name: 'Found', color: 'bg-green-100 text-green-800 border-green-200', activeColor: 'bg-green-500 text-white' },
-    { name: 'For Sale/Give away', color: 'bg-blue-100 text-blue-800 border-blue-200', activeColor: 'bg-blue-500 text-white' }
+    { name: 'For Sale/Give away', color: 'bg-blue-100 text-blue-800 border-blue-200', activeColor: 'bg-blue-500 text-white' },
+    { name: 'EVENTS', color: 'bg-purple-100 text-purple-800 border-purple-200', activeColor: 'bg-purple-500 text-white' }
   ];
 
   const handleAdminLogin = () => {
@@ -262,7 +263,7 @@ export const HomePage: React.FC<HomePageProps> = ({
     });
   };
 
-  const getCategoryCount = (category: 'Lost' | 'Found' | 'For Sale/Give away') => {
+  const getCategoryCount = (category: 'Lost' | 'Found' | 'For Sale/Give away' | 'EVENTS') => {
     return posts.filter(post => post.category === category).length;
   };
 
@@ -399,7 +400,7 @@ export const HomePage: React.FC<HomePageProps> = ({
             {categories.map((category) => (
               <button
                 key={category.name}
-                onClick={() => handleCategoryChange(category.name as 'Lost' | 'Found' | 'For Sale/Give away')}
+                onClick={() => handleCategoryChange(category.name as 'Lost' | 'Found' | 'For Sale/Give away' | 'EVENTS')}
                 className={`px-2 py-3 rounded-lg border-2 transition-all duration-200 ${
                   activeCategory === category.name
                     ? `${category.activeColor} border-transparent shadow-lg ring-2 ring-blue-500 ring-opacity-50`
@@ -415,7 +416,7 @@ export const HomePage: React.FC<HomePageProps> = ({
                   <div className={`text-xs ${
                     activeCategory === category.name ? 'text-white opacity-90' : 'opacity-75'
                   }`}>
-                    {getCategoryCount(category.name as 'Lost' | 'Found' | 'For Sale/Give away')} posts
+                    {getCategoryCount(category.name as 'Lost' | 'Found' | 'For Sale/Give away' | 'EVENTS')} posts
                   </div>
                 </div>
               </button>

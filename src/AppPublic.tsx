@@ -6,12 +6,13 @@ import { NewPostPage } from './components/NewPostPage';
 import { LostPage } from './components/LostPage';
 import { FoundPage } from './components/FoundPage';
 import { ForSalePage } from './components/ForSalePage';
+import { EventsPage } from './components/EventsPage';
 import { usePosts } from './hooks/usePostsPublic';
 
 function App() {
   console.log('App component initializing...');
-  const [currentPage, setCurrentPage] = useState<'Home' | 'NewPost' | 'Lost' | 'Found' | 'ForSale'>('Home');
-  const [activeCategory, setActiveCategory] = useState<'Lost' | 'Found' | 'For Sale/Give away'>('For Sale/Give away');
+  const [currentPage, setCurrentPage] = useState<'Home' | 'NewPost' | 'Lost' | 'Found' | 'ForSale' | 'Events'>('Home');
+  const [activeCategory, setActiveCategory] = useState<'Lost' | 'Found' | 'For Sale/Give away' | 'EVENTS'>('For Sale/Give away');
   
   // Test analytics on app load
   React.useEffect(() => {
@@ -56,7 +57,7 @@ function App() {
     return success;
   };
 
-  const navigate = (page: 'Home' | 'NewPost' | 'Lost' | 'Found' | 'ForSale') => {
+  const navigate = (page: 'Home' | 'NewPost' | 'Lost' | 'Found' | 'ForSale' | 'Events') => {
     setCurrentPage(page);
   };
 
@@ -147,6 +148,16 @@ function App() {
         return (
           <ForSalePage
             posts={getFilteredPosts('For Sale/Give away')}
+            onNavigate={navigate}
+            loading={postsLoading}
+            isAdmin={isAdmin}
+            onDeletePost={deletePost}
+          />
+        );
+      case 'Events':
+        return (
+          <EventsPage
+            posts={getFilteredPosts('EVENTS')}
             onNavigate={navigate}
             loading={postsLoading}
             isAdmin={isAdmin}

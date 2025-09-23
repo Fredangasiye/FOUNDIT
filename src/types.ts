@@ -13,7 +13,7 @@ export interface Post {
   id: string;
   title: string;
   description: string;
-  category: 'Lost' | 'Found' | 'For Sale/Give away';
+  category: 'Lost' | 'Found' | 'For Sale/Give away' | 'EVENTS';
   image: string;
   image2?: string; // Second image for For Sale/Give away posts
   imagePath?: string; // Firebase Storage path for permanent file storage
@@ -29,6 +29,11 @@ export interface Post {
   contactWhatsApp: string;
   contactEmail?: string; // Optional email field
   unitNumber: string;
+  // Event-specific fields
+  eventDate?: string; // Event date for EVENTS category
+  eventTime?: string; // Event time for EVENTS category
+  eventLocation?: string; // Event location for EVENTS category
+  eventLink?: string; // Event/meeting link for EVENTS category
   // Admin fields
   isAdminPost?: boolean;
 }
